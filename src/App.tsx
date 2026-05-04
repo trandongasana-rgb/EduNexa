@@ -8,7 +8,7 @@ import {
   Menu, X, ChevronRight, CheckCircle2, PlayCircle, 
   BookOpen, Users, Star, Award, ArrowRight, XCircle, ArrowUp,
   MonitorPlay, Layout, Gamepad2, Briefcase, Quote, Search, Image as ImageIcon, Box,
-  Plus, Edit, Trash2, Settings, FileText, Eye, EyeOff, LogOut, Lock, Shield, MessageCircle
+  Plus, Edit, Trash2, Settings, FileText, Eye, EyeOff, LogOut, Lock, Shield, MessageCircle, Globe
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 
@@ -748,6 +748,10 @@ export default function App() {
               <p className="flex items-center gap-2">
                 <MonitorPlay className="w-4 h-4 text-[#D4AF37]" />
                 Youtube: <a href="https://www.youtube.com/@AITrainer.Offical" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline">@AITrainer.Offical</a>
+              </p>
+              <p className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[#D4AF37]" />
+                Website: <a href="https://edunexaai.vercel.app" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline">edunexaai.vercel.app</a>
               </p>
             </div>
           </div>
@@ -1664,6 +1668,9 @@ function CourseLandingView({ course, navigateTo }: { course: any, navigateTo: (p
                   </a>
                   <a href="https://www.youtube.com/@AITrainer.Offical" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-white hover:text-[#D4AF37] transition-colors bg-white/5 p-2 rounded-lg border border-white/10">
                     <MonitorPlay className="w-3.5 h-3.5 text-[#D4AF37]" /> Youtube AI Trainer
+                  </a>
+                  <a href="https://edunexaai.vercel.app" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-white hover:text-[#D4AF37] transition-colors bg-white/5 p-2 rounded-lg border border-white/10">
+                    <Globe className="w-3.5 h-3.5 text-[#D4AF37]" /> Website Công Ty
                   </a>
                   <div className="flex flex-col gap-1 p-2 rounded-lg bg-white/5 border border-white/10">
                     <div className="flex items-center gap-2 text-xs text-white">
