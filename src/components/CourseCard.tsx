@@ -6,12 +6,14 @@ import { MediaFrame } from './MediaFrame';
 interface CourseCardProps {
   course: Course;
   onViewDetail: (courseId: string) => void;
+  onQuickRegister?: (courseId: string) => void;
   defaultRegisterUrl: string;
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({
   course,
   onViewDetail,
+  onQuickRegister,
   defaultRegisterUrl,
 }) => {
   const hasOriginalPrice =
@@ -23,7 +25,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   const isExternalRegister = registerHref.startsWith('http');
 
   return (
-    <article className="bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-[0_2px_12px_rgba(8,20,38,0.04)] hover:shadow-[0_12px_30px_rgba(8,20,38,0.08)] transition-all duration-200 flex flex-col h-full overflow-hidden group">
+    <article className="bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-[0_2px_12px_rgba(8,20,38,0.04)] hover:shadow-[0_14px_32px_rgba(8,20,38,0.09)] hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full overflow-hidden group">
       {/* 1. Ảnh bìa đúng tỷ lệ, không nhãn che ảnh */}
       <button
         type="button"
@@ -33,7 +35,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
       >
         <MediaFrame
           src={course.image}
-          alt={course.title}
+          alt={`Khóa học ${course.title} — EDUNEXA AI`}
           className="aspect-[16/10] w-full"
           imgClassName="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
         />
@@ -42,9 +44,16 @@ export const CourseCard: React.FC<CourseCardProps> = ({
       {/* Body */}
       <div className="p-6 flex flex-col flex-grow">
         {/* 2. Đối tượng phù hợp (clean metadata line, zero pill clutter) */}
-        <p className="text-xs font-semibold text-[#0D9488] mb-2">
-          Đối tượng: {course.target}
-        </p>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <p className="text-xs font-semibold text-[#0D9488] truncate">
+            Đối tượng: {course.target}
+          </p>
+          {course.featured && (
+            <span className="text-[11px] font-extrabold text-[#B45309] whitespace-nowrap shrink-0">
+              Khóa nổi bật
+            </span>
+          )}
+        </div>
 
         {/* 3. Tên khóa học */}
         <h3 className="text-lg font-bold text-[#081426] leading-snug mb-2.5">
@@ -102,18 +111,28 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               <ArrowRight className="w-4 h-4" />
             </button>
 
-            <a
-              href={registerHref}
-              target={isExternalRegister ? '_blank' : undefined}
-              rel={isExternalRegister ? 'noopener noreferrer' : undefined}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold transition-colors cursor-pointer whitespace-nowrap"
-            >
-              <span>{course.registerLabel || 'Đăng ký'}</span>
-              {isExternalRegister && <ExternalLink className="w-3.5 h-3.5" />}
-            </a>
+            {onQuickRegister ? (
+              <button
+                type="button"
+                onClick={() => onQuickRegister(course.id)}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <span>{course.registerLabel || 'Đăng ký'}</span>
+              </button>
+            ) : (
+              <a
+                href={registerHref}
+                target={isExternalRegister ? '_blank' : undefined}
+                rel={isExternalRegister ? 'noopener noreferrer' : undefined}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <span>{course.registerLabel || 'Đăng ký'}</span>
+                {isExternalRegister && <ExternalLink className="w-3.5 h-3.5" />}
+              </a>
+            )}
           </div>
         </div>
       </div>
     </article>
   );
-}
+};

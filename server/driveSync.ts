@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import {
   MEDIA_DIR,
   THUMBS_DIR,
+  getCmsState,
   getDriveConfig,
   getMediaAssetByDriveId,
   insertSyncLog,
@@ -17,6 +18,15 @@ import {
   type PublicationStatus,
   type SyncLogRecord,
 } from './db.ts';
+
+class DriveAuthError extends Error {
+  statusCode: number;
+  constructor(statusCode: number, message: string) {
+    super(message);
+    this.name = 'DriveAuthError';
+    this.statusCode = statusCode;
+  }
+}
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -118,20 +128,41 @@ function matchCourseIdFromFilename(filename: string): string | null {
   const baseName = filename.replace(/\.[^.]+$/, '');
   const normalized = normalizeVietnameseSlug(baseName);
 
+  // Include live CMS courses (published + draft) so newly created courses auto-match too
+  const dynamicEntries: Array<{ courseId: string; tokens: string[] }> = [];
+  try {
+    const cms = getCmsState();
+    const seen = new Set(COURSE_MATCH_CATALOG.map((e) => e.courseId));
+    for (const c of [...(cms.published?.courses || []), ...(cms.draft?.courses || [])]) {
+      if (c.id && !seen.has(c.id)) {
+        seen.add(c.id);
+        dynamicEntries.push({
+          courseId: c.id,
+          tokens: [c.id, normalizeVietnameseSlug(c.title || '')].filter(Boolean),
+        });
+      }
+    }
+  } catch {
+    // ignore if CMS state is unavailable
+  }
+
+  const catalog = [...COURSE_MATCH_CATALOG, ...dynamicEntries];
+
   // Match exact slug first, then longest matching deterministic token
-  for (const entry of COURSE_MATCH_CATALOG) {
+  for (const entry of catalog) {
     if (normalized === entry.courseId) {
       return entry.courseId;
     }
   }
-  for (const entry of COURSE_MATCH_CATALOG) {
+  for (const entry of catalog) {
     for (const token of entry.tokens) {
       const normalizedToken = normalizeVietnameseSlug(token);
       if (
-        normalized === normalizedToken ||
-        normalized.startsWith(`${normalizedToken}-`) ||
-        normalized.includes(`-${normalizedToken}-`) ||
-        normalized.endsWith(`-${normalizedToken}`)
+        normalizedToken &&
+        (normalized === normalizedToken ||
+          normalized.startsWith(`${normalizedToken}-`) ||
+          normalized.includes(`-${normalizedToken}-`) ||
+          normalized.endsWith(`-${normalizedToken}`))
       ) {
         return entry.courseId;
       }
@@ -374,6 +405,18 @@ async function listAllFilesInFolder(
     const url = `${DRIVE_API_BASE}/files?q=${q}&fields=nextPageToken,files(id,name,mimeType,md5Checksum,modifiedTime,size,description)&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true${tokenPart}`;
 
     const res = await fetchWithRetry(url, accessToken);
+    if (res.status === 401) {
+      throw new DriveAuthError(
+        401,
+        'Phiên Google OAuth đã hết hạn hoặc bị thu hồi (401) trong quá trình đọc thư mục.'
+      );
+    }
+    if (res.status === 403) {
+      throw new DriveAuthError(
+        403,
+        'Mất quyền truy cập thư mục Google Drive (403). Vui lòng kiểm tra quyền chia sẻ.'
+      );
+    }
     if (!res.ok) {
       throw new Error(`HTTP ${res.status} khi đọc danh sách tệp trong thư mục ${folderId}`);
     }
@@ -618,6 +661,18 @@ export async function runDriveSync(
             file.id
           )}?alt=media&supportsAllDrives=true`;
           const dlRes = await fetchWithRetry(downloadUrl, accessToken);
+          if (dlRes.status === 401) {
+            throw new DriveAuthError(
+              401,
+              'Phiên Google OAuth đã hết hạn hoặc bị thu hồi (401) khi tải ảnh.'
+            );
+          }
+          if (dlRes.status === 403) {
+            throw new DriveAuthError(
+              403,
+              `Mất quyền tải tệp "${file.name}" trên Google Drive (403).`
+            );
+          }
           if (!dlRes.ok) {
             throw new Error(`Tải ảnh thất bại (HTTP ${dlRes.status})`);
           }
@@ -735,6 +790,9 @@ export async function runDriveSync(
             details.push(`Đã đồng bộ ảnh mới: "${file.name}" → ${target.rule.label} (${publicationStatus}).`);
           }
         } catch (err) {
+          if (err instanceof DriveAuthError) {
+            throw err;
+          }
           errorCount++;
           const msg = err instanceof Error ? err.message : 'Lỗi xử lý ảnh không xác định';
           details.push(`Lỗi đồng bộ "${file.name}": ${msg}`);
@@ -788,7 +846,17 @@ export async function runDriveSync(
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : 'Lỗi không xác định khi đồng bộ Google Drive.';
-    updateDriveConfig({ lastError: errMsg });
+    if (err instanceof DriveAuthError) {
+      updateDriveConfig({
+        connectionStatus: 'error',
+        lastError: errMsg,
+      });
+      if (err.statusCode === 401) {
+        clearRuntimeOAuthSession();
+      }
+    } else {
+      updateDriveConfig({ lastError: errMsg });
+    }
     return insertSyncLog({
       startedAt,
       finishedAt: new Date().toISOString(),

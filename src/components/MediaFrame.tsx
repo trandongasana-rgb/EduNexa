@@ -9,6 +9,7 @@ interface MediaFrameProps {
   posterUrl?: string;
   className?: string;
   imgClassName?: string;
+  priority?: boolean;
 }
 
 function getYouTubeEmbedUrl(url: string): string | null {
@@ -32,6 +33,7 @@ export function MediaFrame({
   posterUrl,
   className = '',
   imgClassName = 'w-full h-full object-cover object-top',
+  priority = false,
 }: MediaFrameProps) {
   const [activeSrc, setActiveSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
@@ -57,6 +59,7 @@ export function MediaFrame({
           <iframe
             src={ytEmbed}
             title={alt}
+            loading="lazy"
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -72,6 +75,7 @@ export function MediaFrame({
           poster={posterUrl}
           controls
           playsInline
+          preload="metadata"
           className="w-full h-full object-cover"
         >
           Trình duyệt của bạn không hỗ trợ phát video trực tiếp.
@@ -88,7 +92,8 @@ export function MediaFrame({
           alt={alt}
           className={imgClassName}
           referrerPolicy="no-referrer"
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
           decoding="async"
           onError={handleImgError}
         />

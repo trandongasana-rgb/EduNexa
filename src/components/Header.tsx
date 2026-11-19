@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { EDUNEXA_LOGO } from '../data/initialData';
@@ -28,6 +28,15 @@ export function Header({
   navigateTo,
   scrollToSection,
 }: HeaderProps) {
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isMobileMenuOpen, setIsMobileMenuOpen]);
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-colors duration-200 ${
@@ -36,8 +45,8 @@ export function Header({
           : 'bg-[#081426] border-b border-white/[0.06]'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
-        <div className="flex items-center justify-between gap-8 h-[68px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex items-center justify-between gap-4 lg:gap-8 h-[68px]">
           {/* Zone 1: Clean Brand Logo */}
           <button
             type="button"
@@ -48,14 +57,14 @@ export function Header({
             <img
               src={EDUNEXA_LOGO}
               alt="EDUNEXA AI"
-              className="h-11 sm:h-12 w-auto object-contain"
+              className="h-10 sm:h-11 lg:h-12 w-auto object-contain"
             />
           </button>
 
           {/* Zone 2: 5 Concise Single-Line Nav Links */}
           <nav
             aria-label="Điều hướng chính"
-            className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300"
+            className="hidden md:flex items-center gap-4 lg:gap-7 text-sm font-medium text-slate-300"
           >
             {NAV_ITEMS.map((item) => (
               <button
@@ -74,7 +83,7 @@ export function Header({
             <button
               type="button"
               onClick={() => scrollToSection('dang-ky')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold rounded-lg transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="inline-flex items-center gap-2 px-4 lg:px-5 py-2.5 bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold rounded-lg transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <span>Đăng ký học</span>
               <ArrowRight className="w-4 h-4" />
@@ -134,7 +143,7 @@ export function Header({
                 </button>
               </div>
 
-              <nav className="flex-1 px-5 py-6 flex flex-col justify-between overflow-y-auto">
+              <nav aria-label="Điều hướng di động" className="flex-1 px-5 py-6 flex flex-col justify-between overflow-y-auto">
                 <ul className="space-y-1">
                   {NAV_ITEMS.map((item) => (
                     <li key={item.sectionId}>

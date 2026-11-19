@@ -1,8 +1,11 @@
 export type CourseCategoryId =
   | 'ALL'
-  | 'SOAN_GIANG'
-  | 'GAME_APP'
-  | 'VIDEO_THIET_KE'
+  | 'SOAN_GIAO_AN'
+  | 'SLIDE_AI'
+  | 'TRO_CHOI_MO_PHONG'
+  | 'VIDEO_AI'
+  | 'UNG_DUNG_TRO_LY'
+  | 'TAI_LIEU_CAM_NANG'
   | 'COACHING';
 
 export interface CurriculumItem {
@@ -31,6 +34,9 @@ export interface Course {
   curriculum: CurriculumItem[];
   gifts: string[];
   paymentInfo: string;
+  status?: 'published' | 'hidden';
+  featured?: boolean;
+  displayOrder?: number;
 }
 
 export interface HeroMediaItem {
@@ -42,6 +48,7 @@ export interface HeroMediaItem {
   mediaUrl: string;
   posterUrl?: string;
   relatedCourseId?: string;
+  active?: boolean;
 }
 
 export interface StudentArtifact {
@@ -72,7 +79,14 @@ export interface SiteMediaConfig {
 }
 
 export interface SiteSettings {
+  siteName?: string;
+  siteDescription?: string;
+  footerDescription?: string;
+  copyrightText?: string;
+  contactEmail?: string;
   registrationFormUrl: string;
+  zaloConsultUrl?: string;
+  paymentUrl?: string;
   hotlineDisplay: string;
   hotlineTel: string;
   facebookCommunityUrl: string;
@@ -92,6 +106,159 @@ export interface RoadmapModule {
   title: string;
   summary: string;
   output: string;
+}
+
+export interface HeroContentConfig {
+  kicker: string;
+  headlineLine1: string;
+  headlineLine2: string;
+  description: string;
+  primaryCtaLabel: string;
+  secondaryCtaLabel: string;
+  trustPoints: string[];
+}
+
+export interface InstructorConfig {
+  kicker: string;
+  heading: string;
+  name: string;
+  roleLine: string;
+  bioParagraph1: string;
+  bioParagraph2: string;
+  quote: string;
+  portraitUrl: string;
+}
+
+export interface FaqItem {
+  id: string;
+  q: string;
+  a: string;
+}
+
+export type StandardSectionKey =
+  | 'gia-tri'
+  | 'khoa-hoc'
+  | 'san-pham'
+  | 'lo-trinh'
+  | 'quy-trinh'
+  | 'giang-vien'
+  | 'phan-hoi'
+  | 'hoi-dap'
+  | 'dang-ky';
+
+export interface CustomLandingSection {
+  id: string;
+  kicker: string;
+  title: string;
+  body: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  imageUrl?: string;
+  visible: boolean;
+  theme: 'white' | 'light' | 'navy';
+}
+
+export interface SectionVisibilityMap {
+  'gia-tri': boolean;
+  'khoa-hoc': boolean;
+  'san-pham': boolean;
+  'lo-trinh': boolean;
+  'quy-trinh': boolean;
+  'giang-vien': boolean;
+  'phan-hoi': boolean;
+  'hoi-dap': boolean;
+  'dang-ky': boolean;
+}
+
+export interface CmsSnapshot {
+  courses: Course[];
+  heroContent: HeroContentConfig;
+  heroShowcase: HeroMediaItem[];
+  artifacts: StudentArtifact[];
+  testimonials: TestimonialItem[];
+  instructor: InstructorConfig;
+  faqs: FaqItem[];
+  sectionVisibility: SectionVisibilityMap;
+  customSections: CustomLandingSection[];
+  siteMedia: SiteMediaConfig;
+  settings: SiteSettings;
+}
+
+export interface CmsStateResponse {
+  draft: CmsSnapshot;
+  published: CmsSnapshot;
+  draftUpdatedAt: string;
+  publishedUpdatedAt: string;
+  hasUnpublishedChanges: boolean;
+}
+
+export type InquiryStatus = 'new' | 'contacted' | 'enrolled' | 'archived';
+
+export interface InquiryRecord {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  courseId: string;
+  courseTitle: string;
+  note: string;
+  source: string;
+  status: InquiryStatus;
+  adminNotes: string;
+  consentAccepted?: boolean;
+  consentAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuditLogItem {
+  id: number;
+  timestamp: string;
+  actor: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  summary: string;
+  status: 'success' | 'warning' | 'error';
+}
+
+export interface AdminOverviewResponse {
+  courses: {
+    total: number;
+    published: number;
+    hidden: number;
+    featured: number;
+  };
+  media: {
+    total: number;
+    published: number;
+    pending: number;
+    fromDrive: number;
+    uploaded: number;
+  };
+  banners: {
+    total: number;
+    active: number;
+  };
+  inquiries: {
+    total: number;
+    newCount: number;
+    contactedCount: number;
+    enrolledCount: number;
+  };
+  drive: {
+    isOperational: boolean;
+    connectionStatus: string;
+    rootFolderName: string;
+    lastSyncedAt: string | null;
+    lastErrorCount: number;
+  };
+  cms: {
+    draftUpdatedAt: string;
+    publishedUpdatedAt: string;
+    hasUnpublishedChanges: boolean;
+  };
+  recentLogs: AuditLogItem[];
 }
 
 export type DriveCategory =

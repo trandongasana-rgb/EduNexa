@@ -1,1627 +1,1328 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+  AlertCircle,
+  ArrowLeft,
   BookOpen,
-  Image as ImageIcon,
-  MessageSquare,
-  Settings,
-  Shield,
-  Eye,
-  LogOut,
-  Plus,
-  Edit,
-  Trash2,
-  Upload,
   Check,
-  RotateCcw,
-  Video,
+  CheckCircle2,
+  Cloud,
+  ExternalLink,
+  Eye,
+  FileText,
   HardDrive,
+  Image as ImageIcon,
+  KeyRound,
+  LayoutDashboard,
+  LayoutTemplate,
+  Lock,
+  LogOut,
+  Menu,
+  MessageSquare,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Send,
+  Settings,
+  ShieldCheck,
+  SlidersHorizontal,
+  X,
 } from 'lucide-react';
 import type {
-  Course,
-  CourseCategoryId,
-  HeroMediaItem,
-  SiteMediaConfig,
-  SiteSettings,
-  StudentArtifact,
-  TestimonialItem,
+  AdminOverviewResponse,
+  CmsSnapshot,
+  CmsStateResponse,
 } from '../types';
+import { EDUNEXA_LOGO } from '../data/initialData';
 import {
-  COURSE_CATEGORIES,
-  EDUNEXA_LOGO,
-  VN_TEACHER_IMAGE_PRESETS,
-} from '../data/initialData';
-import { changeAdminPasswordServer, loginAdminServer } from '../services/driveApi';
-import { MediaFrame } from './MediaFrame';
+  changeAdminPasswordServer,
+  fetchAdminOverview,
+  fetchCmsState,
+  loginAdminServer,
+  logoutAdminServer,
+  publishCmsDraftApi,
+  resetCmsDefaultsApi,
+  saveCmsDraftApi,
+} from '../services/driveApi';
 import { DriveSyncPanel } from './DriveSyncPanel';
+import { CoursesManagerSection } from './admin/CoursesManagerSection';
+import { MediaLibrarySection } from './admin/MediaLibrarySection';
+import { BannersManagerSection } from './admin/BannersManagerSection';
+import { LandingContentSection } from './admin/LandingContentSection';
+import { InquiriesSection } from './admin/InquiriesSection';
+import { SystemLogsSection } from './admin/SystemLogsSection';
+
+export type AdminTabKey =
+  | 'overview'
+  | 'courses'
+  | 'media'
+  | 'drive'
+  | 'banners'
+  | 'landing'
+  | 'inquiries'
+  | 'settings'
+  | 'logs';
 
 interface AdminViewProps {
-  courses: Course[];
-  setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
-  heroShowcase: HeroMediaItem[];
-  setHeroShowcase: React.Dispatch<React.SetStateAction<HeroMediaItem[]>>;
-  artifacts: StudentArtifact[];
-  setArtifacts: React.Dispatch<React.SetStateAction<StudentArtifact[]>>;
-  testimonials: TestimonialItem[];
-  setTestimonials: React.Dispatch<React.SetStateAction<TestimonialItem[]>>;
-  siteMedia: SiteMediaConfig;
-  setSiteMedia: React.Dispatch<React.SetStateAction<SiteMediaConfig>>;
-  settings: SiteSettings;
-  setSettings: React.Dispatch<React.SetStateAction<SiteSettings>>;
   isAdmin: boolean;
-  setIsAdmin: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsAdmin: (val: boolean) => void;
   adminSessionToken: string;
-  setAdminSessionToken: React.Dispatch<React.SetStateAction<string>>;
-  onRefreshPublicMedia: () => Promise<void>;
-  onResetAllDefaults: () => void;
+  setAdminSessionToken: (token: string) => void;
+  onRefreshPublicSite: () => Promise<void>;
+  onOpenPreview: (draft: CmsSnapshot) => void;
   navigateTo: (page: string) => void;
+  initialTab?: AdminTabKey;
 }
 
-type AdminTab = 'drive' | 'media' | 'courses' | 'testimonials' | 'settings' | 'security';
-
-function readFileAsDataUrl(file: File, onLoaded: (url: string) => void) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    if (typeof reader.result === 'string') {
-      onLoaded(reader.result);
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-interface ImagePickerFieldProps {
+const SIDEBAR_ITEMS: Array<{
+  key: AdminTabKey;
+  code: string;
   label: string;
-  value: string;
-  onChange: (nextUrl: string) => void;
-  showPresets?: boolean;
-}
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { key: 'overview', code: '01', label: 'Tổng quan', icon: LayoutDashboard },
+  { key: 'courses', code: '02', label: 'Quản lý khóa học', icon: BookOpen },
+  { key: 'media', code: '03', label: 'Thư viện hình ảnh', icon: ImageIcon },
+  { key: 'drive', code: '04', label: 'Google Drive', icon: HardDrive },
+  { key: 'banners', code: '05', label: 'Quản lý banner', icon: LayoutTemplate },
+  { key: 'landing', code: '06', label: 'Nội dung Landing Page', icon: SlidersHorizontal },
+  { key: 'inquiries', code: '07', label: 'Đăng ký và liên hệ', icon: MessageSquare },
+  { key: 'settings', code: '08', label: 'Cài đặt website', icon: Settings },
+  { key: 'logs', code: '09', label: 'Nhật ký hệ thống', icon: FileText },
+];
 
-function ImagePickerField({
-  label,
-  value,
-  onChange,
-  showPresets = true,
-}: ImagePickerFieldProps) {
-  return (
-    <div className="space-y-2.5">
-      <label className="block text-xs font-semibold text-slate-700">{label}</label>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Dán đường dẫn ảnh hoặc tải ảnh từ máy tính..."
-          className="flex-1 px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426] focus:outline-none focus:border-[#081426]"
-        />
-        <label className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#F7F9FC] border border-slate-300 hover:border-[#081426] text-xs font-semibold text-[#081426] cursor-pointer whitespace-nowrap">
-          <Upload className="w-3.5 h-3.5" />
-          <span>Tải ảnh lên</span>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) readFileAsDataUrl(file, onChange);
-            }}
-          />
-        </label>
-      </div>
-
-      {showPresets && (
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 pt-1">
-          {VN_TEACHER_IMAGE_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => onChange(preset.url)}
-              title={preset.label}
-              className={`relative aspect-[16/10] rounded-lg overflow-hidden border transition-all cursor-pointer ${
-                value === preset.url
-                  ? 'border-[#F5BF35] ring-2 ring-[#F5BF35]'
-                  : 'border-slate-200 hover:border-slate-400'
-              }`}
-            >
-              <img
-                src={preset.url}
-                alt={preset.label}
-                className="w-full h-full object-cover object-top"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return 'Chưa có';
+  try {
+    return new Date(iso).toLocaleString('vi-VN', {
+      hour12: false,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
 }
 
 export function AdminView({
-  courses,
-  setCourses,
-  heroShowcase,
-  setHeroShowcase,
-  artifacts,
-  setArtifacts,
-  testimonials,
-  setTestimonials,
-  siteMedia,
-  setSiteMedia,
-  settings,
-  setSettings,
   isAdmin,
   setIsAdmin,
   adminSessionToken,
   setAdminSessionToken,
-  onRefreshPublicMedia,
-  onResetAllDefaults,
+  onRefreshPublicSite,
+  onOpenPreview,
   navigateTo,
+  initialTab = 'overview',
 }: AdminViewProps) {
-  const [activeTab, setActiveTab] = useState<AdminTab>('drive');
+  const [activeTab, setActiveTab] = useState<AdminTabKey>(initialTab);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Login form state
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [statusNotice, setStatusNotice] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Course editing state
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [isAddingCourse, setIsAddingCourse] = useState(false);
-  const [courseDraftImage, setCourseDraftImage] = useState('');
-  const [courseDraftCategories, setCourseDraftCategories] = useState<
-    Exclude<CourseCategoryId, 'ALL'>[]
-  >(['SOAN_GIANG']);
-  const [confirmDeleteCourseId, setConfirmDeleteCourseId] = useState<string | null>(null);
+  // CMS state from SQLite backend
+  const [cmsState, setCmsState] = useState<CmsStateResponse | null>(null);
+  const [draft, setDraft] = useState<CmsSnapshot | null>(null);
+  const [localDirty, setLocalDirty] = useState(false);
+  const [isLoadingCms, setIsLoadingCms] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
-  // Testimonial editing state
-  const [editingTestimonial, setEditingTestimonial] = useState<TestimonialItem | null>(null);
-  const [isAddingTestimonial, setIsAddingTestimonial] = useState(false);
+  // Overview stats
+  const [overview, setOverview] = useState<AdminOverviewResponse | null>(null);
+  const [isLoadingOverview, setIsLoadingOverview] = useState(false);
 
-  // Security form state
-  const [securityMsg, setSecurityMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(
-    null
-  );
-  const [confirmReset, setConfirmReset] = useState(false);
+  // Settings tab state
+  const [currentPwd, setCurrentPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [confirmPwd, setConfirmPwd] = useState('');
+  const [pwdFeedback, setPwdFeedback] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [isChangingPwd, setIsChangingPwd] = useState(false);
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
-  const flashNotice = (msg: string) => {
-    setStatusNotice(msg);
-    setTimeout(() => setStatusNotice(null), 4000);
-  };
+  // Toast notification
+  const [toast, setToast] = useState<{ text: string; kind: 'ok' | 'err' } | null>(null);
+
+  const notify = useCallback((text: string, kind: 'ok' | 'err' = 'ok') => {
+    setToast({ text, kind });
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const loadAllAdminData = useCallback(async () => {
+    if (!isAdmin) return;
+    setIsLoadingCms(true);
+    setIsLoadingOverview(true);
+    setLoadError('');
+    try {
+      const [stateRes, overviewRes] = await Promise.all([
+        fetchCmsState(adminSessionToken),
+        fetchAdminOverview(adminSessionToken),
+      ]);
+      setCmsState(stateRes);
+      setDraft(stateRes.draft);
+      setLocalDirty(false);
+      setOverview(overviewRes);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải dữ liệu quản trị.';
+      setLoadError(msg);
+      if (msg.includes('401') || msg.includes('hết hạn') || msg.includes('quyền')) {
+        setIsAdmin(false);
+        setAdminSessionToken('');
+      }
+    } finally {
+      setIsLoadingCms(false);
+      setIsLoadingOverview(false);
+    }
+  }, [isAdmin, adminSessionToken, setIsAdmin, setAdminSessionToken]);
+
+  const refreshOverviewOnly = useCallback(async () => {
+    if (!isAdmin) return;
+    setIsLoadingOverview(true);
+    try {
+      const overviewRes = await fetchAdminOverview(adminSessionToken);
+      setOverview(overviewRes);
+    } catch {
+      // ignore transient error
+    } finally {
+      setIsLoadingOverview(false);
+    }
+  }, [isAdmin, adminSessionToken]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadAllAdminData();
+    }
+  }, [isAdmin, loadAllAdminData]);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'overview') {
+      refreshOverviewOnly();
+    }
+  }, [isAdmin, activeTab, refreshOverviewOnly]);
+
+  const updateDraft = useCallback((updater: (prev: CmsSnapshot) => CmsSnapshot) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      return updater(prev);
+    });
+    setLocalDirty(true);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginLoading(true);
+    setIsLoggingIn(true);
     setLoginError('');
     try {
       const res = await loginAdminServer(passwordInput);
-      if (res.ok && res.sessionToken) {
-        setAdminSessionToken(res.sessionToken);
-        setIsAdmin(true);
-        setPasswordInput('');
-      } else {
-        setLoginError('Mật khẩu chưa chính xác. Vui lòng thử lại.');
-      }
+      setAdminSessionToken(res.sessionToken);
+      setIsAdmin(true);
+      setPasswordInput('');
     } catch (err) {
-      setLoginError(
-        err instanceof Error ? err.message : 'Mật khẩu chưa chính xác hoặc máy chủ chưa phản hồi.'
-      );
+      setLoginError(err instanceof Error ? err.message : 'Mật khẩu quản trị không chính xác.');
     } finally {
-      setLoginLoading(false);
+      setIsLoggingIn(false);
     }
   };
 
-  const openCourseModal = (course: Course | null) => {
-    if (course) {
-      setEditingCourse(course);
-      setIsAddingCourse(false);
-      setCourseDraftImage(course.image);
-      setCourseDraftCategories(
-        course.categoryIds.length > 0 ? course.categoryIds : ['SOAN_GIANG']
-      );
-    } else {
-      setEditingCourse(null);
-      setIsAddingCourse(true);
-      setCourseDraftImage(VN_TEACHER_IMAGE_PRESETS[0].url);
-      setCourseDraftCategories(['SOAN_GIANG']);
+  const handleLogout = async () => {
+    await logoutAdminServer();
+    setAdminSessionToken('');
+    setIsAdmin(false);
+    setCmsState(null);
+    setDraft(null);
+    setOverview(null);
+    setLocalDirty(false);
+  };
+
+  const handleSaveDraft = async (): Promise<CmsSnapshot | null> => {
+    if (!draft) return null;
+    setIsSavingDraft(true);
+    try {
+      const res = await saveCmsDraftApi(adminSessionToken, draft);
+      setCmsState(res.state);
+      setDraft(res.state.draft);
+      setLocalDirty(false);
+      notify('Đã lưu bản Nháp lên máy chủ. Website công khai chưa thay đổi cho tới khi bấm XUẤT BẢN.');
+      refreshOverviewOnly();
+      return res.state.draft;
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Không thể lưu bản Nháp.', 'err');
+      return null;
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
-  const handleSaveCourse = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePreview = async () => {
+    if (!draft) return;
+    if (localDirty) {
+      const saved = await handleSaveDraft();
+      if (!saved) return;
+      onOpenPreview(saved);
+      return;
+    }
+    onOpenPreview(draft);
+  };
+
+  const handlePublish = async () => {
+    if (!draft) return;
+    setIsPublishing(true);
+    try {
+      const res = await publishCmsDraftApi(adminSessionToken, draft);
+      setCmsState(res.state);
+      setDraft(res.state.draft);
+      setLocalDirty(false);
+      await onRefreshPublicSite();
+      await refreshOverviewOnly();
+      notify('Đã xuất bản nội dung mới lên website công khai EDUNEXA.');
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Không thể xuất bản nội dung.', 'err');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleRefreshAfterMediaChange = useCallback(async () => {
+    await onRefreshPublicSite();
+    if (!isAdmin) return;
+    try {
+      const [stateRes, overviewRes] = await Promise.all([
+        fetchCmsState(adminSessionToken),
+        fetchAdminOverview(adminSessionToken),
+      ]);
+      setCmsState(stateRes);
+      if (!localDirty) {
+        setDraft(stateRes.draft);
+      }
+      setOverview(overviewRes);
+    } catch {
+      // ignore
+    }
+  }, [isAdmin, adminSessionToken, localDirty, onRefreshPublicSite]);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const rawId = (editingCourse?.id || (formData.get('id') as string) || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, '-');
-    const benefitsRaw = (formData.get('benefits') as string) || '';
-    const benefitsList = benefitsRaw
-      .split('\n')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const updatedCourse: Course = {
-      id: rawId || `khoa-hoc-${Date.now()}`,
-      title: ((formData.get('title') as string) || '').trim(),
-      subtitle: ((formData.get('subtitle') as string) || '').trim(),
-      categoryIds:
-        courseDraftCategories.length > 0 ? courseDraftCategories : ['SOAN_GIANG'],
-      description: ((formData.get('description') as string) || '').trim(),
-      fullDescription:
-        editingCourse?.fullDescription ||
-        ((formData.get('description') as string) || '').trim(),
-      outcome: ((formData.get('outcome') as string) || '').trim(),
-      image: courseDraftImage || VN_TEACHER_IMAGE_PRESETS[0].url,
-      target: ((formData.get('target') as string) || '').trim(),
-      price: ((formData.get('price') as string) || '').trim(),
-      originalPrice: ((formData.get('originalPrice') as string) || '').trim(),
-      registerUrl:
-        ((formData.get('registerUrl') as string) || '').trim() ||
-        settings.registrationFormUrl,
-      registerLabel:
-        ((formData.get('registerLabel') as string) || '').trim() || undefined,
-      benefits:
-        benefitsList.length > 0
-          ? benefitsList
-          : editingCourse?.benefits || ['Thực hành theo từng bước cụ thể'],
-      pains: editingCourse?.pains || [
-        'Cần quy trình ứng dụng AI rõ ràng vào công việc giảng dạy.',
-      ],
-      solutions: editingCourse?.solutions || [
-        'Thực hành trực tiếp tạo sản phẩm học liệu số phục vụ lớp học.',
-      ],
-      curriculum: editingCourse?.curriculum || [
-        { mod: 'Phần 01', title: 'Tổng quan & Quy trình thực hành' },
-      ],
-      gifts: editingCourse?.gifts || ['Tài liệu & bộ câu lệnh mẫu thực hành'],
-      paymentInfo:
-        ((formData.get('paymentInfo') as string) || '').trim() ||
-        editingCourse?.paymentInfo ||
-        'Techcombank (TCB) - STK: 88.3558.3558 - Chủ TK: CONG TY TNHH MTV GIAO DUC EDUNEXA',
-    };
-
-    if (isAddingCourse) {
-      setCourses((prev) => [...prev, updatedCourse]);
-      flashNotice('Đã thêm khóa học mới.');
-    } else {
-      setCourses((prev) =>
-        prev.map((c) => (c.id === updatedCourse.id ? updatedCourse : c))
-      );
-      flashNotice('Đã cập nhật thông tin khóa học.');
+    setPwdFeedback(null);
+    if (newPwd.length < 6) {
+      setPwdFeedback({ type: 'err', text: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+      return;
     }
-    setEditingCourse(null);
-    setIsAddingCourse(false);
-  };
-
-  const handleHeroItemUpdate = (
-    id: string,
-    patch: Partial<HeroMediaItem>
-  ) => {
-    setHeroShowcase((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...patch } : item))
-    );
-  };
-
-  const handleAddHeroItem = () => {
-    const nextItem: HeroMediaItem = {
-      id: `hero-${Date.now()}`,
-      label: 'Học liệu mới',
-      title: 'Sản phẩm học liệu thực tế của EDUNEXA',
-      description: 'Mô tả ngắn gọn công dụng của sản phẩm trong giảng dạy.',
-      mediaType: 'image',
-      mediaUrl: VN_TEACHER_IMAGE_PRESETS[0].url,
-      relatedCourseId: courses[0]?.id,
-    };
-    setHeroShowcase((prev) => [...prev, nextItem]);
-    flashNotice('Đã thêm mục trình diễn mới vào Hero.');
-  };
-
-  const handleDeleteHeroItem = (id: string) => {
-    if (heroShowcase.length <= 1) return;
-    setHeroShowcase((prev) => prev.filter((item) => item.id !== id));
-    flashNotice('Đã xóa mục khỏi khu vực trình diễn Hero.');
-  };
-
-  const handleSaveTestimonial = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editingTestimonial) return;
-    if (isAddingTestimonial) {
-      setTestimonials((prev) => [...prev, editingTestimonial]);
-      flashNotice('Đã thêm phản hồi học viên.');
-    } else {
-      setTestimonials((prev) =>
-        prev.map((t) => (t.id === editingTestimonial.id ? editingTestimonial : t))
-      );
-      flashNotice('Đã cập nhật phản hồi học viên.');
+    if (newPwd !== confirmPwd) {
+      setPwdFeedback({ type: 'err', text: 'Mật khẩu xác nhận không trùng khớp.' });
+      return;
     }
-    setEditingTestimonial(null);
-    setIsAddingTestimonial(false);
+    setIsChangingPwd(true);
+    try {
+      await changeAdminPasswordServer(adminSessionToken, currentPwd, newPwd);
+      setCurrentPwd('');
+      setNewPwd('');
+      setConfirmPwd('');
+      setPwdFeedback({
+        type: 'ok',
+        text: 'Đã cập nhật mật khẩu quản trị trên máy chủ thành công.',
+      });
+      notify('Đã đổi mật khẩu quản trị thành công.');
+    } catch (err) {
+      setPwdFeedback({
+        type: 'err',
+        text: err instanceof Error ? err.message : 'Đổi mật khẩu thất bại.',
+      });
+    } finally {
+      setIsChangingPwd(false);
+    }
   };
 
+  const handleResetDefaults = async () => {
+    setIsResetting(true);
+    try {
+      const res = await resetCmsDefaultsApi(adminSessionToken);
+      setCmsState(res.state);
+      setDraft(res.state.draft);
+      setLocalDirty(false);
+      setConfirmResetOpen(false);
+      await onRefreshPublicSite();
+      await refreshOverviewOnly();
+      notify('Đã khôi phục toàn bộ nội dung mặc định và cập nhật website công khai.');
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Không thể khôi phục mặc định.', 'err');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  // =========================================================================
+  // 1. DEDICATED ADMIN LOGIN SCREEN (/quan-tri)
+  // =========================================================================
   if (!isAdmin) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#F7F9FC] px-5 py-16">
-        <div className="bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 shadow-sm w-full max-w-md">
-          <div className="flex justify-center mb-6">
-            <div className="px-5 py-3 bg-[#081426] rounded-xl border border-white/10">
-              <img
-                src={EDUNEXA_LOGO}
-                alt="Logo EDUNEXA"
-                className="h-12 w-auto object-contain"
-              />
+      <div className="min-h-screen bg-[#081426] flex flex-col justify-center items-center px-5 py-12">
+        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 shadow-xl">
+          <div className="flex items-center justify-between mb-6 pb-5 border-b border-slate-100">
+            <img
+              src={EDUNEXA_LOGO}
+              alt="EDUNEXA AI"
+              className="h-11 w-auto object-contain"
+            />
+            <span className="text-xs font-bold text-[#0D9488] tracking-wide uppercase">
+              /quan-tri
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-[#081426] text-[#F5BF35] flex items-center justify-center shrink-0">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-lg font-extrabold text-[#081426] leading-tight">
+                Đăng nhập Quản trị EDUNEXA
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Khu vực quản trị nội dung, khóa học, hình ảnh và Google Drive
+              </p>
             </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-center text-[#081426] mb-2">
-            Quản trị EDUNEXA AI
-          </h1>
-          <p className="text-center text-slate-500 text-sm mb-7">
-            Đăng nhập để quản lý khóa học, thay toàn bộ hình ảnh/video Hero và cấu hình trang.
-          </p>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 mt-6">
             <div>
               <label
-                htmlFor="admin-login-pwd"
-                className="block text-sm font-semibold text-slate-700 mb-1.5"
+                htmlFor="admin-password-input"
+                className="block text-xs font-bold text-slate-700 mb-1.5"
               >
                 Mật khẩu quản trị
               </label>
               <input
-                id="admin-login-pwd"
+                id="admin-password-input"
                 type="password"
                 value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="Nhập mật khẩu..."
+                onChange={(e) => {
+                  setPasswordInput(e.target.value);
+                  setLoginError('');
+                }}
+                placeholder="Nhập mật khẩu quản trị viên"
+                autoFocus
                 required
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-[#081426] focus:outline-none focus:border-[#081426]"
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm text-[#081426] focus:outline-none focus:border-[#081426]"
               />
+              {loginError && (
+                <p className="text-xs text-rose-600 font-semibold mt-2 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{loginError}</span>
+                </p>
+              )}
             </div>
-            {loginError && (
-              <p className="text-xs font-semibold text-rose-600">{loginError}</p>
-            )}
+
             <button
               type="submit"
-              disabled={loginLoading}
-              className="w-full py-3.5 bg-[#081426] hover:bg-[#102644] text-white font-bold text-sm rounded-xl transition-colors cursor-pointer disabled:opacity-60"
+              disabled={isLoggingIn}
+              className="w-full py-3 rounded-xl bg-[#081426] hover:bg-[#102644] disabled:opacity-60 text-white font-bold text-sm transition-colors cursor-pointer"
             >
-              {loginLoading ? 'Đang xác thực...' : 'Đăng nhập quản trị'}
+              {isLoggingIn ? 'Đang xác thực tài khoản...' : 'Đăng nhập hệ thống quản trị'}
             </button>
           </form>
 
-          <button
-            type="button"
-            onClick={() => navigateTo('home')}
-            className="w-full mt-4 py-2 text-sm text-slate-500 hover:text-[#081426] cursor-pointer"
-          >
-            Quay lại trang chủ
-          </button>
+          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs">
+            <button
+              type="button"
+              onClick={() => navigateTo('home')}
+              className="inline-flex items-center gap-1.5 text-slate-600 hover:text-[#081426] font-semibold cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Quay lại website công khai</span>
+            </button>
+            <span className="inline-flex items-center gap-1 text-slate-400">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#0D9488]" />
+              <span>Xác thực máy chủ</span>
+            </span>
+          </div>
         </div>
       </div>
     );
   }
 
+  const currentTabMeta =
+    SIDEBAR_ITEMS.find((item) => item.key === activeTab) || SIDEBAR_ITEMS[0];
+  const hasUnpublished = localDirty || Boolean(cmsState?.hasUnpublishedChanges);
+
   return (
-    <div className="min-h-screen bg-[#F7F9FC] py-10 sm:py-14">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
-        {/* Top Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-slate-200">
-          <div>
-            <p className="text-xs font-semibold text-[#0D9488] mb-1">
-              Hệ thống quản trị nội dung · EDUNEXA
-            </p>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#081426]">
-              Quản lý khóa học, hình ảnh & chuyển đổi
-            </h1>
-          </div>
+    <div className="min-h-screen bg-[#F7F9FC] text-[#081426] flex">
+      {/* =================================================================
+          MOBILE SIDEBAR BACKDROP
+      ================================================================= */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-[#081426]/60 lg:hidden"
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => navigateTo('home')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 hover:border-[#081426] text-sm font-semibold text-[#081426] cursor-pointer"
-            >
-              <Eye className="w-4 h-4" />
-              <span>Xem trang chủ</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setAdminSessionToken('');
-                setIsAdmin(false);
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-rose-300 text-sm font-semibold text-rose-600 cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Đăng xuất</span>
-            </button>
-          </div>
+      {/* =================================================================
+          LEFT SIDEBAR (260px Navy #081426 — Exact 9 Required Sections)
+      ================================================================= */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-[264px] bg-[#081426] text-white flex flex-col border-r border-white/10 transition-transform duration-200 lg:translate-x-0 lg:static lg:shrink-0 ${
+          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="h-16 px-5 flex items-center justify-between border-b border-white/10 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('overview');
+              setMobileSidebarOpen(false);
+            }}
+            className="flex items-center gap-2.5 cursor-pointer"
+          >
+            <img
+              src={EDUNEXA_LOGO}
+              alt="EDUNEXA"
+              className="h-9 w-auto object-contain"
+            />
+            <div className="text-left leading-tight">
+              <span className="block text-xs font-extrabold tracking-wide text-white">
+                EDUNEXA CMS
+              </span>
+              <span className="block text-[11px] text-slate-400">
+                Quản trị nội dung
+              </span>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(false)}
+            className="lg:hidden p-1.5 text-slate-400 hover:text-white cursor-pointer"
+            aria-label="Đóng thanh điều hướng"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Inline Status Notice */}
-        {statusNotice && (
-          <div className="mb-6 px-4 py-3 rounded-xl bg-[#081426] text-white text-sm font-medium flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#16B8A6] shrink-0" />
-            <span>{statusNotice}</span>
+        {/* Exact 9 Sidebar Menu Items */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Menu quản trị">
+          {SIDEBAR_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key;
+            const badgeCount =
+              item.key === 'inquiries' && overview && overview.inquiries.newCount > 0
+                ? overview.inquiries.newCount
+                : item.key === 'media' && overview && overview.media.pending > 0
+                ? overview.media.pending
+                : 0;
+
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => {
+                  setActiveTab(item.key);
+                  setMobileSidebarOpen(false);
+                }}
+                className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm transition-colors cursor-pointer ${
+                  isActive
+                    ? 'bg-[#102644] text-white font-bold ring-1 ring-[#F5BF35]/50'
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white font-medium'
+                }`}
+              >
+                <span className="flex items-center gap-2.5 min-w-0">
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? 'text-[#F5BF35]' : 'text-slate-400'
+                    }`}
+                  />
+                  <span className="truncate">
+                    <span className="text-[11px] font-bold text-slate-400 tabular-nums mr-1.5">
+                      {item.code}.
+                    </span>
+                    {item.label}
+                  </span>
+                </span>
+                {badgeCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#F5BF35] text-[#081426] text-[11px] font-extrabold tabular-nums shrink-0">
+                    {badgeCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Bottom Utility Links */}
+        <div className="p-3 border-t border-white/10 space-y-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => navigateTo('home')}
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-2">
+              <ExternalLink className="w-4 h-4 text-[#16B8A6]" />
+              <span>Xem website công khai</span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Đăng xuất quản trị</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* =================================================================
+          MAIN CONTENT SHELL
+      ================================================================= */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Sticky Top Workflow Bar: LƯU NHÁP · XEM TRƯỚC · XUẤT BẢN */}
+        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-lg border border-slate-200 text-[#081426] cursor-pointer"
+                aria-label="Mở menu quản trị"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-lg font-extrabold text-[#081426] truncate">
+                  {currentTabMeta.code}. {currentTabMeta.label}
+                </h1>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+                  {hasUnpublished ? (
+                    <span className="font-semibold text-amber-700">
+                      {localDirty
+                        ? 'Có chỉnh sửa chưa lưu nháp'
+                        : 'Có bản nháp chưa xuất bản lên website'}
+                    </span>
+                  ) : (
+                    <span className="font-semibold text-[#0D9488]">
+                      Đã đồng bộ với bản đang xuất bản
+                    </span>
+                  )}
+                  {cmsState?.publishedUpdatedAt && (
+                    <span className="text-slate-400 tabular-nums hidden sm:inline">
+                      · Xuất bản gần nhất: {formatDateTime(cmsState.publishedUpdatedAt)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Required Global Workflow Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                disabled={!draft || isSavingDraft || isPublishing}
+                onClick={handleSaveDraft}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl border border-slate-300 bg-white hover:bg-[#F7F9FC] hover:border-[#081426] disabled:opacity-50 text-[#081426] text-xs font-bold whitespace-nowrap cursor-pointer transition-colors"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>{isSavingDraft ? 'Đang lưu...' : 'LƯU NHÁP'}</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={!draft || isSavingDraft || isPublishing}
+                onClick={handlePreview}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl border border-[#081426] bg-[#102644] hover:bg-[#081426] disabled:opacity-50 text-white text-xs font-bold whitespace-nowrap cursor-pointer transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5 text-[#F5BF35]" />
+                <span>XEM TRƯỚC</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={!draft || isSavingDraft || isPublishing}
+                onClick={handlePublish}
+                className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] disabled:opacity-50 text-[#081426] text-xs font-extrabold whitespace-nowrap cursor-pointer transition-colors"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{isPublishing ? 'Đang xuất bản...' : 'XUẤT BẢN'}</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Inline Notification Banner */}
+        {toast && (
+          <div className="px-4 sm:px-6 lg:px-8 pt-4">
+            <div
+              className={`max-w-7xl mx-auto px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 ${
+                toast.kind === 'err'
+                  ? 'bg-rose-50 border-rose-200 text-rose-700'
+                  : 'bg-[#F0FDFA] border-[#99F6E4] text-[#0F766E]'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                {toast.kind === 'err' ? (
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                )}
+                <span>{toast.text}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                className="p-1 opacity-70 hover:opacity-100 cursor-pointer"
+                aria-label="Đóng thông báo"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Sidebar Navigation */}
-          <aside className="lg:col-span-3">
-            <div className="bg-white rounded-2xl border border-slate-200 p-2 space-y-1">
-              {[
-                { id: 'drive' as const, label: 'Kết nối Google Drive', icon: HardDrive },
-                { id: 'media' as const, label: 'Hình ảnh & Hero Showcase', icon: ImageIcon },
-                { id: 'courses' as const, label: `Khóa học (${courses.length})`, icon: BookOpen },
-                { id: 'testimonials' as const, label: `Phản hồi (${testimonials.length})`, icon: MessageSquare },
-                { id: 'settings' as const, label: 'Liên kết & Sticky Mobile', icon: Settings },
-                { id: 'security' as const, label: 'Mật khẩu & Khôi phục', icon: Shield },
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer text-left ${
-                      isActive
-                        ? 'bg-[#081426] text-white'
-                        : 'text-slate-600 hover:bg-[#F7F9FC] hover:text-[#081426]'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </aside>
-
-          {/* Main Tab Content */}
-          <div className="lg:col-span-9 space-y-8">
-            {/* =======================================================
-                TAB 0: GOOGLE DRIVE AUTO-SYNC & MEDIA PIPELINE
-            ======================================================= */}
-            {activeTab === 'drive' && (
-              <DriveSyncPanel
-                adminSessionToken={adminSessionToken}
-                courses={courses}
-                onMediaPublishedChange={onRefreshPublicMedia}
-                onNotify={flashNotice}
-              />
-            )}
-
-            {/* =======================================================
-                TAB 1: MEDIA & HERO SHOWCASE (Thay toàn bộ ảnh & video)
-            ======================================================= */}
-            {activeTab === 'media' && (
-              <div className="space-y-8">
-                {/* 1A. Hero Showcase Media */}
-                <section className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                    <div>
-                      <h2 className="text-lg font-extrabold text-[#081426]">
-                        Khu vực trình diễn bên phải Hero (Ảnh hoặc Video)
-                      </h2>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                        Thay ảnh bằng file tải lên, đường dẫn ảnh hoặc link video YouTube / MP4 do EduNexa cung cấp.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAddHeroItem}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#081426] text-white text-xs font-bold cursor-pointer shrink-0 w-fit"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Thêm mục trình diễn</span>
-                    </button>
-                  </div>
-
-                  <div className="space-y-6">
-                    {heroShowcase.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="p-5 rounded-xl bg-[#F7F9FC] border border-slate-200 space-y-4"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-xs font-bold text-[#0D9488] tabular-nums">
-                            Mục #{index + 1} · {item.label}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <div className="inline-flex p-0.5 bg-white border border-slate-200 rounded-lg text-xs">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleHeroItemUpdate(item.id, { mediaType: 'image' })
-                                }
-                                className={`px-2.5 py-1 rounded-md font-semibold cursor-pointer ${
-                                  item.mediaType === 'image'
-                                    ? 'bg-[#081426] text-white'
-                                    : 'text-slate-600'
-                                }`}
-                              >
-                                Ảnh
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleHeroItemUpdate(item.id, { mediaType: 'video' })
-                                }
-                                className={`px-2.5 py-1 rounded-md font-semibold cursor-pointer inline-flex items-center gap-1 ${
-                                  item.mediaType === 'video'
-                                    ? 'bg-[#081426] text-white'
-                                    : 'text-slate-600'
-                                }`}
-                              >
-                                <Video className="w-3 h-3" />
-                                Video
-                              </button>
-                            </div>
-
-                            {heroShowcase.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteHeroItem(item.id)}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 cursor-pointer"
-                                aria-label="Xóa mục Hero"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-                          <div className="md:col-span-4">
-                            <MediaFrame
-                              src={item.mediaUrl}
-                              alt={item.title}
-                              mediaType={item.mediaType}
-                              className="aspect-[16/10] w-full rounded-xl border border-slate-200"
-                            />
-                          </div>
-
-                          <div className="md:col-span-8 space-y-3">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                  Tên nút chuyển tab
-                                </label>
-                                <input
-                                  type="text"
-                                  value={item.label}
-                                  onChange={(e) =>
-                                    handleHeroItemUpdate(item.id, { label: e.target.value })
-                                  }
-                                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                  Tiêu đề sản phẩm
-                                </label>
-                                <input
-                                  type="text"
-                                  value={item.title}
-                                  onChange={(e) =>
-                                    handleHeroItemUpdate(item.id, { title: e.target.value })
-                                  }
-                                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                Mô tả ngắn
-                              </label>
-                              <input
-                                type="text"
-                                value={item.description}
-                                onChange={(e) =>
-                                  handleHeroItemUpdate(item.id, { description: e.target.value })
-                                }
-                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                              />
-                            </div>
-
-                            {item.mediaType === 'video' ? (
-                              <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                  Link Video (YouTube hoặc file MP4 trực tiếp)
-                                </label>
-                                <input
-                                  type="text"
-                                  value={item.mediaUrl}
-                                  onChange={(e) =>
-                                    handleHeroItemUpdate(item.id, { mediaUrl: e.target.value })
-                                  }
-                                  placeholder="https://www.youtube.com/watch?v=... hoặc https://.../demo.mp4"
-                                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                                />
-                              </div>
-                            ) : (
-                              <ImagePickerField
-                                label="Hình ảnh trình diễn"
-                                value={item.mediaUrl}
-                                onChange={(url) =>
-                                  handleHeroItemUpdate(item.id, { mediaUrl: url })
-                                }
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* 1B. Site Section Photos (Value section & Founder portrait) */}
-                <section className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 space-y-6">
-                  <div className="pb-4 border-b border-slate-100">
-                    <h2 className="text-lg font-extrabold text-[#081426]">
-                      Hình ảnh mục Giá trị & Chân dung Giảng viên
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                      Mọi thay đổi được lưu tự động và áp dụng ngay lập tức trên trang chủ.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-4 rounded-xl bg-[#F7F9FC] border border-slate-200 space-y-4">
-                      <MediaFrame
-                        src={siteMedia.valueSectionImage}
-                        alt="Ảnh mục Giá trị"
-                        className="aspect-[16/10] w-full rounded-xl"
-                      />
-                      <ImagePickerField
-                        label="Ảnh mục 02 — Giá trị cho giáo viên"
-                        value={siteMedia.valueSectionImage}
-                        onChange={(url) => {
-                          setSiteMedia((prev) => ({ ...prev, valueSectionImage: url }));
-                          flashNotice('Đã cập nhật ảnh mục Giá trị.');
-                        }}
-                      />
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-[#F7F9FC] border border-slate-200 space-y-4">
-                      <MediaFrame
-                        src={siteMedia.founderPortrait}
-                        alt="Chân dung Giảng viên Trần Đông"
-                        className="aspect-[16/10] w-full rounded-xl"
-                      />
-                      <ImagePickerField
-                        label="Ảnh mục 07 — Giảng viên Trần Đông"
-                        value={siteMedia.founderPortrait}
-                        onChange={(url) => {
-                          setSiteMedia((prev) => ({ ...prev, founderPortrait: url }));
-                          flashNotice('Đã cập nhật ảnh chân dung giảng viên.');
-                        }}
-                      />
-                    </div>
-                  </div>
-                </section>
-
-                {/* 1C. 6 Student Practical Artifact Images */}
-                <section className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 space-y-5">
-                  <div className="pb-4 border-b border-slate-100">
-                    <h2 className="text-lg font-extrabold text-[#081426]">
-                      Hình ảnh mục 04 — Sản phẩm học viên thực hành
-                    </h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {artifacts.map((art) => (
-                      <div
-                        key={art.id}
-                        className="p-4 rounded-xl bg-[#F7F9FC] border border-slate-200 space-y-3"
-                      >
-                        <MediaFrame
-                          src={art.image}
-                          alt={art.title}
-                          className="aspect-[16/10] w-full rounded-xl"
-                        />
-                        <p className="text-sm font-bold text-[#081426]">{art.title}</p>
-                        <ImagePickerField
-                          label="Ảnh minh họa sản phẩm"
-                          value={art.image}
-                          onChange={(url) => {
-                            setArtifacts((prev) =>
-                              prev.map((item) =>
-                                item.id === art.id ? { ...item, image: url } : item
-                              )
-                            );
-                            flashNotice(`Đã cập nhật ảnh: ${art.title}`);
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </section>
+        {/* Workspace Content */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="max-w-7xl mx-auto">
+            {loadError ? (
+              <div className="bg-white rounded-2xl border border-rose-200 p-8 text-center">
+                <p className="text-sm font-bold text-rose-700 mb-3">{loadError}</p>
+                <button
+                  type="button"
+                  onClick={loadAllAdminData}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#081426] text-white text-xs font-bold cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Tải lại dữ liệu</span>
+                </button>
               </div>
-            )}
-
-            {/* =======================================================
-                TAB 2: COURSE MANAGEMENT
-            ======================================================= */}
-            {activeTab === 'courses' && (
-              <section className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-[#081426]">
-                      Danh sách khóa học ({courses.length})
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                      Chỉnh sửa ảnh bìa, kết quả học tập, giá thực tế và đường dẫn đăng ký thật của từng khóa.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => openCourseModal(null)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#081426] text-white text-xs font-bold cursor-pointer w-fit"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Thêm khóa học</span>
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {courses.map((course) => (
-                    <div
-                      key={course.id}
-                      className="p-4 rounded-xl bg-[#F7F9FC] border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-                    >
-                      <MediaFrame
-                        src={course.image}
-                        alt={course.title}
-                        className="w-full sm:w-28 aspect-[16/10] rounded-lg shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-[#081426] leading-snug">
-                          {course.title}
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-0.5">{course.target}</p>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mt-2 tabular-nums">
-                          <span className="font-bold text-[#081426]">{course.price}</span>
-                          {course.originalPrice && (
-                            <span className="text-slate-400 line-through">
-                              {course.originalPrice}
-                            </span>
-                          )}
-                          <span className="text-slate-400">·</span>
-                          <span className="text-[#0D9488] truncate max-w-[240px]">
-                            {course.registerUrl}
-                          </span>
-                        </div>
+            ) : isLoadingCms || !draft ? (
+              <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-sm text-slate-500">
+                Đang tải dữ liệu hệ thống quản trị từ máy chủ...
+              </div>
+            ) : (
+              <>
+                {/* =========================================================
+                    01. TỔNG QUAN
+                ========================================================= */}
+                {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Top Action Header */}
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-extrabold text-[#081426]">
+                          Tổng quan hệ thống EDUNEXA
+                        </h2>
+                        <p className="text-sm text-slate-600 mt-0.5">
+                          Số liệu thực tế được truy vấn trực tiếp từ cơ sở dữ liệu máy chủ.
+                        </p>
                       </div>
+                      <button
+                        type="button"
+                        onClick={refreshOverviewOnly}
+                        disabled={isLoadingOverview}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#081426] text-xs font-semibold text-[#081426] cursor-pointer"
+                      >
+                        <RefreshCw
+                          className={`w-3.5 h-3.5 ${isLoadingOverview ? 'animate-spin' : ''}`}
+                        />
+                        <span>Làm mới số liệu</span>
+                      </button>
+                    </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => openCourseModal(course)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-slate-200 hover:border-[#081426] text-xs font-semibold text-[#081426] cursor-pointer"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                          <span>Sửa</span>
-                        </button>
+                    {/* 4 KPI Cards (Single elevation, tabular-nums, zero fake stats) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('courses')}
+                        className="text-left bg-white rounded-2xl border border-slate-200 hover:border-[#081426] p-5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-slate-500">Khóa học</span>
+                          <BookOpen className="w-4 h-4 text-[#0D9488]" />
+                        </div>
+                        <p className="text-3xl font-extrabold text-[#081426] tabular-nums">
+                          {overview?.courses.published ?? draft.courses.filter((c) => c.status !== 'hidden').length}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1.5 tabular-nums">
+                          Đang hiển thị / {overview?.courses.total ?? draft.courses.length} tổng ·{' '}
+                          {overview?.courses.featured ?? draft.courses.filter((c) => c.featured).length} nổi bật
+                        </p>
+                      </button>
 
-                        {confirmDeleteCourseId === course.id ? (
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCourses((prev) => prev.filter((c) => c.id !== course.id));
-                                setConfirmDeleteCourseId(null);
-                                flashNotice('Đã xóa khóa học.');
-                              }}
-                              className="px-3 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer"
-                            >
-                              Xác nhận xóa
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setConfirmDeleteCourseId(null)}
-                              className="px-2.5 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer"
-                            >
-                              Hủy
-                            </button>
-                          </div>
-                        ) : (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('media')}
+                        className="text-left bg-white rounded-2xl border border-slate-200 hover:border-[#081426] p-5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-slate-500">Thư viện hình ảnh</span>
+                          <ImageIcon className="w-4 h-4 text-[#0D9488]" />
+                        </div>
+                        <p className="text-3xl font-extrabold text-[#081426] tabular-nums">
+                          {overview?.media.total ?? 0}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1.5 tabular-nums">
+                          {overview?.media.published ?? 0} đã xuất bản · {overview?.media.pending ?? 0} chờ duyệt
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('inquiries')}
+                        className="text-left bg-white rounded-2xl border border-slate-200 hover:border-[#081426] p-5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-slate-500">Đăng ký & Liên hệ</span>
+                          <MessageSquare className="w-4 h-4 text-[#0D9488]" />
+                        </div>
+                        <p className="text-3xl font-extrabold text-[#081426] tabular-nums">
+                          {overview?.inquiries.total ?? 0}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1.5 tabular-nums">
+                          {overview?.inquiries.newCount ?? 0} mới tiếp nhận · {overview?.inquiries.enrolledCount ?? 0} đã đăng ký
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('drive')}
+                        className="text-left bg-white rounded-2xl border border-slate-200 hover:border-[#081426] p-5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-slate-500">Google Drive</span>
+                          <Cloud className="w-4 h-4 text-[#0D9488]" />
+                        </div>
+                        <p className="text-base font-extrabold text-[#081426] truncate">
+                          {overview?.drive.connectionStatus === 'connected_verified'
+                            ? overview.drive.rootFolderName || 'Đã kết nối'
+                            : 'Chưa kết nối'}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-2 tabular-nums">
+                          {overview?.drive.lastSyncedAt
+                            ? `Đồng bộ: ${formatDateTime(overview.drive.lastSyncedAt)}`
+                            : 'Chưa chạy đồng bộ nào'}
+                        </p>
+                      </button>
+                    </div>
+
+                    {/* Draft/Publish Status + Quick Actions */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between">
+                        <div>
+                          <h3 className="text-base font-bold text-[#081426] mb-1">
+                            Trạng thái xuất bản nội dung
+                          </h3>
+                          <p className="text-xs text-slate-500 mb-5">
+                            Mọi chỉnh sửa được lưu ở bản Nháp trên máy chủ. Bấm XUẤT BẢN để đồng bộ ngay ra website công khai.
+                          </p>
+
+                          <dl className="space-y-3 text-sm border-t border-slate-100 pt-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <dt className="text-slate-500">Bản Nháp gần nhất</dt>
+                              <dd className="font-semibold text-[#081426] tabular-nums">
+                                {formatDateTime(cmsState?.draftUpdatedAt)}
+                              </dd>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <dt className="text-slate-500">Bản Xuất bản gần nhất</dt>
+                              <dd className="font-semibold text-[#081426] tabular-nums">
+                                {formatDateTime(cmsState?.publishedUpdatedAt)}
+                              </dd>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <dt className="text-slate-500">Banner đang hoạt động</dt>
+                              <dd className="font-semibold text-[#081426] tabular-nums">
+                                {overview?.banners.active ?? draft.heroShowcase.filter((b) => b.active !== false).length} /{' '}
+                                {overview?.banners.total ?? draft.heroShowcase.length}
+                              </dd>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <dt className="text-slate-500">Trạng thái đồng bộ</dt>
+                              <dd
+                                className={`font-bold ${
+                                  hasUnpublished ? 'text-amber-700' : 'text-[#0D9488]'
+                                }`}
+                              >
+                                {hasUnpublished ? 'Có thay đổi chưa xuất bản' : 'Đã đồng bộ'}
+                              </dd>
+                            </div>
+                          </dl>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2.5 mt-6 pt-4 border-t border-slate-100">
                           <button
                             type="button"
-                            onClick={() => setConfirmDeleteCourseId(course.id)}
-                            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-300 cursor-pointer"
-                            aria-label={`Xóa khóa học ${course.title}`}
+                            onClick={() => setActiveTab('courses')}
+                            className="px-3.5 py-2.5 rounded-xl bg-[#F7F9FC] hover:bg-slate-200/70 text-xs font-bold text-[#081426] cursor-pointer"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            Sửa khóa học
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('landing')}
+                            className="px-3.5 py-2.5 rounded-xl bg-[#F7F9FC] hover:bg-slate-200/70 text-xs font-bold text-[#081426] cursor-pointer"
+                          >
+                            Sửa Landing Page
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Recent Real Audit Logs */}
+                      <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6">
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                          <div>
+                            <h3 className="text-base font-bold text-[#081426]">
+                              Hoạt động hệ thống gần đây
+                            </h3>
+                            <p className="text-xs text-slate-500">
+                              Ghi nhận tự động khi lưu nháp, xuất bản, đồng bộ Drive hoặc tiếp nhận đăng ký.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('logs')}
+                            className="text-xs font-bold text-[#0D9488] hover:underline whitespace-nowrap cursor-pointer"
+                          >
+                            Xem toàn bộ nhật ký
+                          </button>
+                        </div>
+
+                        {overview && overview.recentLogs.length > 0 ? (
+                          <div className="divide-y divide-slate-100">
+                            {overview.recentLogs.slice(0, 7).map((log) => (
+                              <div
+                                key={log.id}
+                                className="py-3 flex items-start justify-between gap-4 text-xs"
+                              >
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-[#081426] leading-snug">
+                                    {log.summary}
+                                  </p>
+                                  <p className="text-slate-400 mt-0.5">
+                                    {log.actor} · {log.action}
+                                  </p>
+                                </div>
+                                <span className="text-slate-400 tabular-nums whitespace-nowrap shrink-0">
+                                  {formatDateTime(log.timestamp)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-500 py-8 text-center">
+                            Chưa có bản ghi nhật ký nào.
+                          </p>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* =======================================================
-                TAB 3: TESTIMONIALS WITH REAL SOURCE
-            ======================================================= */}
-            {activeTab === 'testimonials' && (
-              <section className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-[#081426]">
-                      Phản hồi học viên có nguồn thực tế
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                      Cập nhật các chia sẻ thực tế từ nhóm Zalo, cộng đồng Facebook kèm ảnh học liệu và liên kết nguồn.
-                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAddingTestimonial(true);
-                      setEditingTestimonial({
-                        id: `fb-${Date.now()}`,
-                        name: '',
-                        role: 'Giáo viên',
-                        quote: '',
-                        sourceLabel: 'Chia sẻ từ Cộng đồng Giáo viên AI EDUNEXA',
-                        sourceUrl: settings.facebookCommunityUrl,
-                        avatar: VN_TEACHER_IMAGE_PRESETS[0].url,
-                        productImage: VN_TEACHER_IMAGE_PRESETS[2].url,
-                        productCaption: 'Học liệu thực hành',
-                      });
-                    }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#081426] text-white text-xs font-bold cursor-pointer w-fit"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Thêm phản hồi</span>
-                  </button>
-                </div>
+                )}
 
-                <div className="space-y-4">
-                  {testimonials.map((t) => (
-                    <div
-                      key={t.id}
-                      className="p-4 rounded-xl bg-[#F7F9FC] border border-slate-200 flex flex-col sm:flex-row items-start gap-4"
-                    >
-                      <MediaFrame
-                        src={t.avatar}
-                        alt={t.name}
-                        className="w-12 h-12 rounded-full shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-[#081426]">
-                          {t.name} <span className="font-normal text-slate-500">· {t.role}</span>
+                {/* =========================================================
+                    02. QUẢN LÝ KHÓA HỌC
+                ========================================================= */}
+                {activeTab === 'courses' && (
+                  <CoursesManagerSection
+                    courses={draft.courses}
+                    onChangeCourses={(nextCourses) =>
+                      updateDraft((prev) => ({ ...prev, courses: nextCourses }))
+                    }
+                    defaultRegisterUrl={draft.settings.registrationFormUrl}
+                    adminSessionToken={adminSessionToken}
+                    onNotify={(msg) => notify(msg)}
+                  />
+                )}
+
+                {/* =========================================================
+                    03. THƯ VIỆN HÌNH ẢNH
+                ========================================================= */}
+                {activeTab === 'media' && (
+                  <MediaLibrarySection
+                    adminSessionToken={adminSessionToken}
+                    courses={draft.courses}
+                    onRefreshAll={handleRefreshAfterMediaChange}
+                    onNotify={(msg) => notify(msg)}
+                  />
+                )}
+
+                {/* =========================================================
+                    04. GOOGLE DRIVE
+                ========================================================= */}
+                {activeTab === 'drive' && (
+                  <DriveSyncPanel
+                    adminSessionToken={adminSessionToken}
+                    courses={draft.courses}
+                    onMediaPublishedChange={handleRefreshAfterMediaChange}
+                    onNotify={(msg) => notify(msg)}
+                  />
+                )}
+
+                {/* =========================================================
+                    05. QUẢN LÝ BANNER
+                ========================================================= */}
+                {activeTab === 'banners' && (
+                  <BannersManagerSection
+                    banners={draft.heroShowcase}
+                    onChangeBanners={(nextBanners) =>
+                      updateDraft((prev) => ({ ...prev, heroShowcase: nextBanners }))
+                    }
+                    courses={draft.courses}
+                    adminSessionToken={adminSessionToken}
+                    onNotify={(msg) => notify(msg)}
+                  />
+                )}
+
+                {/* =========================================================
+                    06. NỘI DUNG LANDING PAGE
+                ========================================================= */}
+                {activeTab === 'landing' && (
+                  <LandingContentSection
+                    draft={draft}
+                    onUpdateDraft={updateDraft}
+                    adminSessionToken={adminSessionToken}
+                    onNotify={(msg) => notify(msg)}
+                  />
+                )}
+
+                {/* =========================================================
+                    07. ĐĂNG KÝ VÀ LIÊN HỆ
+                ========================================================= */}
+                {activeTab === 'inquiries' && (
+                  <InquiriesSection
+                    adminSessionToken={adminSessionToken}
+                    courses={draft.courses}
+                    settings={draft.settings}
+                    onChangeSettings={(nextSettings) =>
+                      updateDraft((prev) => ({ ...prev, settings: nextSettings }))
+                    }
+                    onNotify={(msg) => notify(msg)}
+                  />
+                )}
+
+                {/* =========================================================
+                    08. CÀI ĐẶT WEBSITE
+                ========================================================= */}
+                {activeTab === 'settings' && (
+                  <div className="space-y-6">
+                    {/* General Website Metadata & Footer */}
+                    <section className="bg-white rounded-2xl border border-slate-200 p-6">
+                      <h2 className="text-base font-extrabold text-[#081426] mb-1">
+                        Thông tin nhận diện & Chân trang website
+                      </h2>
+                      <p className="text-xs text-slate-500 mb-5">
+                        Sau khi chỉnh sửa, nhấn LƯU NHÁP hoặc XUẤT BẢN ở thanh trên để áp dụng.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Tên website (Title)
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.settings.siteName || ''}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, siteName: e.target.value },
+                              }))
+                            }
+                            placeholder="EDUNEXA AI — Đào tạo ứng dụng AI thực chiến cho giáo viên"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Dòng bản quyền chân trang
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.settings.copyrightText || ''}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, copyrightText: e.target.value },
+                              }))
+                            }
+                            placeholder="© 2026 CONG TY TNHH MTV GIAO DUC EDUNEXA. Bảo lưu mọi quyền."
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Mô tả SEO (Meta Description)
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={draft.settings.siteDescription || ''}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, siteDescription: e.target.value },
+                              }))
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Mô tả giới thiệu tại Footer
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={draft.settings.footerDescription || ''}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, footerDescription: e.target.value },
+                              }))
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Mobile Sticky CTA Config */}
+                    <section className="bg-white rounded-2xl border border-slate-200 p-6">
+                      <div className="flex items-center justify-between gap-4 mb-5">
+                        <div>
+                          <h2 className="text-base font-extrabold text-[#081426]">
+                            Thanh kêu gọi đăng ký trên điện thoại (Mobile Sticky Bar)
+                          </h2>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Hiển thị gọn ở cạnh dưới màn hình điện thoại khi người dùng cuộn trang chủ.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateDraft((prev) => ({
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                mobileStickyEnabled: !prev.settings.mobileStickyEnabled,
+                              },
+                            }))
+                          }
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                            draft.settings.mobileStickyEnabled
+                              ? 'bg-[#081426] text-white'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {draft.settings.mobileStickyEnabled ? 'Đang bật' : 'Đang tắt'}
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Nhãn nút CTA
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.settings.mobileStickyLabel}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, mobileStickyLabel: e.target.value },
+                              }))
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Dòng phụ hiển thị bên trái
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.settings.mobileStickySublabel}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, mobileStickySublabel: e.target.value },
+                              }))
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                            Liên kết đích
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.settings.mobileStickyUrl}
+                            onChange={(e) =>
+                              updateDraft((prev) => ({
+                                ...prev,
+                                settings: { ...prev.settings, mobileStickyUrl: e.target.value },
+                              }))
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Admin Account Security + Reset Defaults */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      <section className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6">
+                        <div className="flex items-center gap-2.5 mb-1">
+                          <KeyRound className="w-4 h-4 text-[#0D9488]" />
+                          <h2 className="text-base font-extrabold text-[#081426]">
+                            Đổi mật khẩu tài khoản quản trị
+                          </h2>
+                        </div>
+                        <p className="text-xs text-slate-500 mb-5">
+                          Mật khẩu được mã hóa (scrypt) và lưu bền vững trên cơ sở dữ liệu máy chủ.
                         </p>
-                        <p className="text-sm text-slate-600 mt-1 leading-relaxed">“{t.quote}”</p>
-                        <p className="text-xs text-[#0D9488] mt-1.5">{t.sourceLabel}</p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsAddingTestimonial(false);
-                            setEditingTestimonial({ ...t });
-                          }}
-                          className="px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-[#081426] cursor-pointer"
-                        >
-                          Sửa
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTestimonials((prev) => prev.filter((item) => item.id !== t.id));
-                            flashNotice('Đã xóa phản hồi.');
-                          }}
-                          className="p-2 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-rose-600 cursor-pointer"
-                          aria-label="Xóa phản hồi"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+
+                        <form onSubmit={handleChangePassword} className="space-y-3.5">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Mật khẩu hiện tại
+                            </label>
+                            <input
+                              type="password"
+                              required
+                              value={currentPwd}
+                              onChange={(e) => setCurrentPwd(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                Mật khẩu mới (tối thiểu 6 ký tự)
+                              </label>
+                              <input
+                                type="password"
+                                required
+                                minLength={6}
+                                value={newPwd}
+                                onChange={(e) => setNewPwd(e.target.value)}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                Nhập lại mật khẩu mới
+                              </label>
+                              <input
+                                type="password"
+                                required
+                                minLength={6}
+                                value={confirmPwd}
+                                onChange={(e) => setConfirmPwd(e.target.value)}
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#081426]"
+                              />
+                            </div>
+                          </div>
+
+                          {pwdFeedback && (
+                            <p
+                              className={`text-xs font-semibold ${
+                                pwdFeedback.type === 'ok' ? 'text-[#0D9488]' : 'text-rose-600'
+                              }`}
+                            >
+                              {pwdFeedback.text}
+                            </p>
+                          )}
+
+                          <button
+                            type="submit"
+                            disabled={isChangingPwd}
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#081426] hover:bg-[#102644] disabled:opacity-50 text-white text-xs font-bold cursor-pointer"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>{isChangingPwd ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}</span>
+                          </button>
+                        </form>
+                      </section>
+
+                      <section className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-2.5 mb-1">
+                            <RotateCcw className="w-4 h-4 text-rose-600" />
+                            <h2 className="text-base font-extrabold text-[#081426]">
+                              Khôi phục dữ liệu mặc định
+                            </h2>
+                          </div>
+                          <p className="text-xs text-slate-500 leading-relaxed mt-2">
+                            Đưa toàn bộ khóa học, banner, nội dung Landing Page, FAQ và cài đặt về bộ
+                            mặc định ban đầu của EDUNEXA. Không xóa ảnh đã đồng bộ từ Google Drive và
+                            không xóa danh sách đăng ký học viên.
+                          </p>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-slate-100">
+                          {!confirmResetOpen ? (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmResetOpen(true)}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold cursor-pointer"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              <span>Khôi phục cấu hình mặc định</span>
+                            </button>
+                          ) : (
+                            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 space-y-3">
+                              <p className="text-xs font-bold text-rose-800">
+                                Xác nhận khôi phục toàn bộ nội dung về mặc định và xuất bản lại?
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  disabled={isResetting}
+                                  onClick={handleResetDefaults}
+                                  className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold cursor-pointer"
+                                >
+                                  {isResetting ? 'Đang khôi phục...' : 'Xác nhận khôi phục'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isResetting}
+                                  onClick={() => setConfirmResetOpen(false)}
+                                  className="px-3.5 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-semibold cursor-pointer"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </section>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* =======================================================
-                TAB 4: SETTINGS & MOBILE STICKY CTA
-            ======================================================= */}
-            {activeTab === 'settings' && (
-              <section className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 space-y-6">
-                <div className="pb-4 border-b border-slate-100">
-                  <h2 className="text-lg font-extrabold text-[#081426]">
-                    Cấu hình liên kết đăng ký, liên hệ & thanh nổi trên di động
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Link biểu mẫu đăng ký mặc định
-                    </label>
-                    <input
-                      type="url"
-                      value={settings.registrationFormUrl}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          registrationFormUrl: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Số Hotline / Zalo hiển thị
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.hotlineDisplay}
-                      onChange={(e) => {
-                        const display = e.target.value;
-                        const digits = display.replace(/\D/g, '');
-                        setSettings((prev) => ({
-                          ...prev,
-                          hotlineDisplay: display,
-                          hotlineTel: digits ? `tel:${digits}` : prev.hotlineTel,
-                        }));
-                      }}
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Link Cộng đồng Facebook
-                    </label>
-                    <input
-                      type="url"
-                      value={settings.facebookCommunityUrl}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          facebookCommunityUrl: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Link Facebook cá nhân
-                    </label>
-                    <input
-                      type="url"
-                      value={settings.facebookPersonalUrl}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          facebookPersonalUrl: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                    />
-                  </div>
-                </div>
+                )}
 
-                {/* Mobile Sticky CTA Toggle & Config */}
-                <div className="p-5 rounded-xl bg-[#F7F9FC] border border-slate-200 space-y-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-bold text-[#081426]">
-                        Thanh đăng ký / liên hệ nổi trên điện thoại
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        Chỉ hiển thị gọn ở mép dưới khi người dùng cuộn trang trên màn hình di động.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={settings.mobileStickyEnabled}
-                      onClick={() =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          mobileStickyEnabled: !prev.mobileStickyEnabled,
-                        }))
-                      }
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
-                        settings.mobileStickyEnabled
-                          ? 'bg-[#081426] text-white'
-                          : 'bg-slate-200 text-slate-600'
-                      }`}
-                    >
-                      {settings.mobileStickyEnabled ? 'Đang bật' : 'Đang tắt'}
-                    </button>
-                  </div>
-
-                  {settings.mobileStickyEnabled && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Nhãn nút CTA
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.mobileStickyLabel}
-                          onChange={(e) =>
-                            setSettings((prev) => ({
-                              ...prev,
-                              mobileStickyLabel: e.target.value,
-                            }))
-                          }
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Dòng phụ hỗ trợ
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.mobileStickySublabel}
-                          onChange={(e) =>
-                            setSettings((prev) => ({
-                              ...prev,
-                              mobileStickySublabel: e.target.value,
-                            }))
-                          }
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Đường dẫn khi bấm
-                        </label>
-                        <input
-                          type="text"
-                          value={settings.mobileStickyUrl}
-                          onChange={(e) =>
-                            setSettings((prev) => ({
-                              ...prev,
-                              mobileStickyUrl: e.target.value,
-                            }))
-                          }
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-[#081426]"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => flashNotice('Cấu hình đã được lưu tự động.')}
-                  className="px-6 py-2.5 rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold cursor-pointer"
-                >
-                  Lưu cấu hình
-                </button>
-              </section>
-            )}
-
-            {/* =======================================================
-                TAB 5: SECURITY & RESET DEFAULTS
-            ======================================================= */}
-            {activeTab === 'security' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <section className="bg-white p-6 rounded-2xl border border-slate-200">
-                  <h2 className="text-lg font-extrabold text-[#081426] mb-5">
-                    Thay đổi mật khẩu quản trị
-                  </h2>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const formEl = e.currentTarget;
-                      const fd = new FormData(formEl);
-                      const current = (fd.get('currentPassword') as string) || '';
-                      const next = (fd.get('newPassword') as string) || '';
-                      const confirm = (fd.get('confirmPassword') as string) || '';
-                      if (next.length < 6) {
-                        setSecurityMsg({
-                          type: 'error',
-                          text: 'Mật khẩu mới cần tối thiểu 6 ký tự.',
-                        });
-                        return;
-                      }
-                      if (next !== confirm) {
-                        setSecurityMsg({ type: 'error', text: 'Xác nhận mật khẩu chưa khớp.' });
-                        return;
-                      }
-                      try {
-                        await changeAdminPasswordServer(adminSessionToken, current, next);
-                        setSecurityMsg({
-                          type: 'success',
-                          text: 'Đã cập nhật mật khẩu quản trị trên máy chủ thành công.',
-                        });
-                        formEl.reset();
-                      } catch (err) {
-                        setSecurityMsg({
-                          type: 'error',
-                          text:
-                            err instanceof Error
-                              ? err.message
-                              : 'Không thể cập nhật mật khẩu quản trị.',
-                        });
-                      }
-                    }}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Mật khẩu hiện tại
-                      </label>
-                      <input
-                        name="currentPassword"
-                        type="password"
-                        required
-                        className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Mật khẩu mới
-                      </label>
-                      <input
-                        name="newPassword"
-                        type="password"
-                        required
-                        className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Nhập lại mật khẩu mới
-                      </label>
-                      <input
-                        name="confirmPassword"
-                        type="password"
-                        required
-                        className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                      />
-                    </div>
-                    {securityMsg && (
-                      <p
-                        className={`text-xs font-semibold ${
-                          securityMsg.type === 'success' ? 'text-[#0D9488]' : 'text-rose-600'
-                        }`}
-                      >
-                        {securityMsg.text}
-                      </p>
-                    )}
-                    <button
-                      type="submit"
-                      className="w-full py-3 rounded-xl bg-[#081426] hover:bg-[#102644] text-white text-sm font-bold cursor-pointer"
-                    >
-                      Cập nhật mật khẩu
-                    </button>
-                  </form>
-                </section>
-
-                <section className="bg-white p-6 rounded-2xl border border-slate-200 flex flex-col justify-between">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-[#081426] mb-2">
-                      Khôi phục dữ liệu mặc định
-                    </h2>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-6">
-                      Đưa toàn bộ khóa học, hình ảnh Hero, sản phẩm thực hành và cấu hình liên hệ về
-                      trạng thái chuẩn ban đầu của EDUNEXA.
-                    </p>
-                  </div>
-
-                  {!confirmReset ? (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmReset(true)}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 hover:border-rose-400 text-sm font-semibold text-[#081426] cursor-pointer w-fit"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>Khôi phục dữ liệu mặc định</span>
-                    </button>
-                  ) : (
-                    <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 space-y-3">
-                      <p className="text-xs font-semibold text-rose-800">
-                        Xác nhận đặt lại toàn bộ dữ liệu đã chỉnh sửa trên trình duyệt này?
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onResetAllDefaults();
-                            setConfirmReset(false);
-                            flashNotice('Đã khôi phục toàn bộ dữ liệu mặc định.');
-                          }}
-                          className="px-4 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer"
-                        >
-                          Xác nhận khôi phục
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmReset(false)}
-                          className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer"
-                        >
-                          Hủy
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </section>
-              </div>
+                {/* =========================================================
+                    09. NHẬT KÝ HỆ THỐNG
+                ========================================================= */}
+                {activeTab === 'logs' && (
+                  <SystemLogsSection adminSessionToken={adminSessionToken} />
+                )}
+              </>
             )}
           </div>
-        </div>
+        </main>
       </div>
-
-      {/* COURSE ADD / EDIT MODAL */}
-      {(editingCourse || isAddingCourse) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#081426]/70 backdrop-blur-xs">
-          <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 sm:p-8 border border-slate-200">
-            <h2 className="text-xl font-extrabold text-[#081426] mb-5">
-              {isAddingCourse ? 'Thêm khóa học mới' : 'Chỉnh sửa khóa học'}
-            </h2>
-
-            <form onSubmit={handleSaveCourse} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Mã khóa học (slug)
-                  </label>
-                  <input
-                    name="id"
-                    defaultValue={editingCourse?.id}
-                    required
-                    disabled={!isAddingCourse}
-                    placeholder="ai-toan-dien-cho-giao-vien"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426] disabled:bg-slate-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Đối tượng phù hợp
-                  </label>
-                  <input
-                    name="target"
-                    defaultValue={editingCourse?.target}
-                    required
-                    placeholder="Giáo viên mọi cấp học"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Tên khóa học
-                </label>
-                <input
-                  name="title"
-                  defaultValue={editingCourse?.title}
-                  required
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Phụ đề ngắn
-                </label>
-                <input
-                  name="subtitle"
-                  defaultValue={editingCourse?.subtitle}
-                  required
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Nhóm khóa học
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {COURSE_CATEGORIES.filter((c) => c.id !== 'ALL').map((cat) => {
-                    const catId = cat.id as Exclude<CourseCategoryId, 'ALL'>;
-                    const checked = courseDraftCategories.includes(catId);
-                    return (
-                      <button
-                        key={catId}
-                        type="button"
-                        onClick={() => {
-                          setCourseDraftCategories((prev) =>
-                            prev.includes(catId)
-                              ? prev.filter((item) => item !== catId)
-                              : [...prev, catId]
-                          );
-                        }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
-                          checked
-                            ? 'bg-[#081426] text-white border-[#081426]'
-                            : 'bg-white text-slate-600 border-slate-200'
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Kết quả học tập (hiển thị trên thẻ khóa học)
-                </label>
-                <textarea
-                  name="outcome"
-                  defaultValue={editingCourse?.outcome || editingCourse?.description}
-                  required
-                  rows={2}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Mô tả khóa học
-                </label>
-                <textarea
-                  name="description"
-                  defaultValue={editingCourse?.description}
-                  required
-                  rows={2}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nội dung chính (mỗi dòng 1 ý)
-                </label>
-                <textarea
-                  name="benefits"
-                  defaultValue={(editingCourse?.benefits || []).join('\n')}
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Giá thực tế
-                  </label>
-                  <input
-                    name="price"
-                    defaultValue={editingCourse?.price}
-                    required
-                    placeholder="999.000đ"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Giá gốc (nếu có)
-                  </label>
-                  <input
-                    name="originalPrice"
-                    defaultValue={editingCourse?.originalPrice}
-                    placeholder="1.999.000đ"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Đường dẫn đăng ký thật
-                  </label>
-                  <input
-                    name="registerUrl"
-                    defaultValue={editingCourse?.registerUrl || settings.registrationFormUrl}
-                    required
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Nhãn nút đăng ký (mặc định: Đăng ký)
-                  </label>
-                  <input
-                    name="registerLabel"
-                    defaultValue={editingCourse?.registerLabel || ''}
-                    placeholder="Đăng ký"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Thông tin chuyển khoản / thanh toán
-                </label>
-                <input
-                  name="paymentInfo"
-                  defaultValue={editingCourse?.paymentInfo}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <ImagePickerField
-                label="Ảnh bìa khóa học"
-                value={courseDraftImage}
-                onChange={setCourseDraftImage}
-              />
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingCourse(null);
-                    setIsAddingCourse(false);
-                  }}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold cursor-pointer"
-                >
-                  Lưu khóa học
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* TESTIMONIAL ADD / EDIT MODAL */}
-      {editingTestimonial && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#081426]/70 backdrop-blur-xs">
-          <div className="bg-white w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 sm:p-8 border border-slate-200">
-            <h2 className="text-xl font-extrabold text-[#081426] mb-5">
-              {isAddingTestimonial ? 'Thêm phản hồi học viên' : 'Chỉnh sửa phản hồi'}
-            </h2>
-            <form onSubmit={handleSaveTestimonial} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Họ tên Thầy / Cô
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingTestimonial.name}
-                    onChange={(e) =>
-                      setEditingTestimonial({ ...editingTestimonial, name: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Chức danh / Cấp học
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingTestimonial.role}
-                    onChange={(e) =>
-                      setEditingTestimonial({ ...editingTestimonial, role: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nội dung chia sẻ thực tế
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={editingTestimonial.quote}
-                  onChange={(e) =>
-                    setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })
-                  }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Nguồn phản hồi
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingTestimonial.sourceLabel}
-                    onChange={(e) =>
-                      setEditingTestimonial({
-                        ...editingTestimonial,
-                        sourceLabel: e.target.value,
-                      })
-                    }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Link nguồn kiểm chứng
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={editingTestimonial.sourceUrl}
-                    onChange={(e) =>
-                      setEditingTestimonial({
-                        ...editingTestimonial,
-                        sourceUrl: e.target.value,
-                      })
-                    }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Chú thích học liệu thực hành
-                </label>
-                <input
-                  type="text"
-                  value={editingTestimonial.productCaption}
-                  onChange={(e) =>
-                    setEditingTestimonial({
-                      ...editingTestimonial,
-                      productCaption: e.target.value,
-                    })
-                  }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-[#081426]"
-                />
-              </div>
-
-              <ImagePickerField
-                label="Ảnh đại diện học viên"
-                value={editingTestimonial.avatar}
-                onChange={(url) =>
-                  setEditingTestimonial({ ...editingTestimonial, avatar: url })
-                }
-                showPresets={false}
-              />
-
-              <ImagePickerField
-                label="Ảnh sản phẩm học liệu"
-                value={editingTestimonial.productImage}
-                onChange={(url) =>
-                  setEditingTestimonial({ ...editingTestimonial, productImage: url })
-                }
-              />
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingTestimonial(null);
-                    setIsAddingTestimonial(false);
-                  }}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] text-sm font-bold cursor-pointer"
-                >
-                  Lưu phản hồi
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

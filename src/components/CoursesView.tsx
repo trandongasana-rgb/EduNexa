@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, X, ArrowLeft } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { Course, CourseCategoryId, SiteSettings } from '../types';
 import { COURSE_CATEGORIES } from '../data/initialData';
 import { CourseCard } from './CourseCard';
@@ -27,6 +28,13 @@ export function CoursesView({ courses, settings, navigateTo }: CoursesViewProps)
     return matchesCategory && matchesSearch;
   });
 
+  const handleOpenCourseRegister = (courseId: string) => {
+    navigateTo(`course-${courseId}`);
+    setTimeout(() => {
+      document.getElementById('course-register-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 180);
+  };
+
   return (
     <div className="bg-[#F7F9FC] min-h-screen py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
@@ -47,13 +55,13 @@ export function CoursesView({ courses, settings, navigateTo }: CoursesViewProps)
             Các khóa học AI dành cho giáo viên
           </h1>
           <p className="text-base text-slate-600 leading-relaxed">
-            Tìm kiếm theo nhu cầu giảng dạy, cấp học hoặc nhóm kỹ năng AI Thầy Cô đang muốn ứng dụng.
+            Lọc theo nhóm kỹ năng thực hành: soạn giáo án, thiết kế slide, trò chơi & mô phỏng, video AI, ứng dụng & trợ lý AI.
           </p>
         </div>
 
         {/* Search + Filter Controls */}
-        <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center mb-10">
-          <div className="relative flex-1 max-w-md">
+        <div className="space-y-4 mb-10">
+          <div className="relative max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
@@ -74,40 +82,52 @@ export function CoursesView({ courses, settings, navigateTo }: CoursesViewProps)
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            <div className="inline-flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-xl">
-              {COURSE_CATEGORIES.map((cat) => {
-                const isActive = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-                      isActive
-                        ? 'bg-[#081426] text-white'
-                        : 'text-slate-600 hover:text-[#081426] hover:bg-[#F7F9FC]'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {COURSE_CATEGORIES.map((cat) => {
+              const categoryId = cat.id;
+              const count =
+                categoryId === 'ALL'
+                  ? courses.length
+                  : courses.filter((c) => c.categoryIds.includes(categoryId)).length;
+              if (count === 0 && categoryId !== 'ALL') return null;
+
+              const isActive = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3.5 py-2 min-h-[40px] rounded-xl text-xs sm:text-sm font-semibold border transition-colors whitespace-nowrap cursor-pointer tabular-nums ${
+                    isActive
+                      ? 'bg-[#081426] text-white border-[#081426]'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-[#081426] hover:text-[#081426]'
+                  }`}
+                >
+                  {cat.label} ({count})
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {filteredCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+          <motion.div
+            key={selectedCategory + searchQuery}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7"
+          >
             {filteredCourses.map((course) => (
               <CourseCard
                 key={course.id}
                 course={course}
                 onViewDetail={(id) => navigateTo(`course-${id}`)}
+                onQuickRegister={handleOpenCourseRegister}
                 defaultRegisterUrl={settings.registrationFormUrl}
               />
             ))}
-          </div>
+          </motion.div>
         ) : (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
             <p className="text-lg font-bold text-[#081426] mb-2">
