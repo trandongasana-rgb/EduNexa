@@ -1,101 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Be Vietnam Pro", "Inter", sans-serif;
-  --color-dark-base: #06101F;
-  --color-dark-secondary: #0A172A;
-  --color-dark-elevated: #101E32;
-  --color-brand-blue: #2563EB;
-  --color-brand-cyan: #22D3EE;
-  --color-brand-gold: #F4C430;
-  --color-brand-light: #F8FAFC;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --color-navy-950: #081426;
+  --color-navy-900: #102644;
+  --color-gold-400: #F5BF35;
+  --color-gold-500: #E2AB22;
+  --color-surface-light: #F7F9FC;
+  --color-teal-accent: #16B8A6;
 }
 
 :root {
-  --bg-dark: #06101F;
-  --bg-secondary: #0A172A;
-  --bg-dark-elevated: #101E32;
-  --primary-blue: #2563EB;
-  --cyan-accent: #22D3EE;
-  --gold-accent: #F4C430;
-  --bg-light: #F8FAFC;
-  --text-white: #FFFFFF;
-  --text-slate: #E2E8F0;
-  --text-muted: #94A3B8;
+  --edunexa-navy: #081426;
+  --edunexa-navy-light: #102644;
+  --edunexa-gold: #F5BF35;
+  --edunexa-white: #FFFFFF;
+  --edunexa-bg-light: #F7F9FC;
+  --edunexa-teal: #16B8A6;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
     font-family: var(--font-sans);
-    background-color: #06101F;
-    color: #FFFFFF;
+    background-color: #081426;
+    color: #081426;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     overflow-x: hidden;
     min-height: 100vh;
+    background-color: #FFFFFF;
+    color: #081426;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
   }
 }
 
-/* Custom premium ambient lighting and card utilities */
-.hero-glow-radial {
-  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(37, 99, 235, 0.18), transparent 70%);
-}
-
-.hero-subtle-grid {
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-@keyframes slow-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes slow-float-reverse {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(8px);
-  }
-}
-
-.animate-slow-float {
-  animation: slow-float 6s ease-in-out infinite;
-}
-
-.animate-slow-float-reverse {
-  animation: slow-float-reverse 7s ease-in-out infinite;
-}
-
-@keyframes marquee-left {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee-left {
-  display: flex;
-  width: max-content;
-  animation: marquee-left 45s linear infinite;
-  will-change: transform;
-}
-
-.animate-marquee-left:hover {
-  animation-play-state: paused;
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -107,3 +56,13 @@
   scrollbar-width: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
