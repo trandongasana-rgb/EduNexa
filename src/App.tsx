@@ -32,6 +32,29 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
+import imgHeroClassroom from './assets/images/vn_teacher_hero_classroom_1795059315644.jpg';
+import imgLessonPlanning from './assets/images/vn_teacher_lesson_planning_1795059325799.jpg';
+import imgFounderPortrait from './assets/images/vn_teacher_founder_portrait_1795059325079.jpg';
+import imgInteractiveGames from './assets/images/vn_teacher_interactive_games_1795059326886.jpg';
+import imgScienceLab3d from './assets/images/vn_teacher_science_lab_3d_1795059326436.jpg';
+import imgVideoStudio from './assets/images/vn_teacher_video_studio_1795059324657.jpg';
+import imgWorkshopCoaching from './assets/images/vn_teacher_workshop_coaching_1795059323779.jpg';
+import imgOverworkedDesk from './assets/images/vn_teacher_overworked_desk_1795059324867.jpg';
+import imgAvatarFemale1 from './assets/images/vn_teacher_avatar_female_1_1795059323530.jpg';
+import imgAvatarMale1 from './assets/images/vn_teacher_avatar_male_1_1795059325036.jpg';
+import imgAvatarFemale2 from './assets/images/vn_teacher_avatar_female_2_1795059325934.jpg';
+
+const EDUNEXA_LOGO = '/assets/aistudio/Logo_final_99910642.png';
+
+const VN_TEACHER_IMAGE_PRESETS = [
+  { label: 'Cô giáo giảng bài bảng số', url: imgHeroClassroom },
+  { label: 'Thầy cô tập huấn AI', url: imgWorkshopCoaching },
+  { label: 'Cô giáo soạn giáo án', url: imgLessonPlanning },
+  { label: 'Thầy giáo tổ chức trò chơi', url: imgInteractiveGames },
+  { label: 'Cô giáo dạy STEM & 3D', url: imgScienceLab3d },
+  { label: 'Cô giáo quay video bài giảng', url: imgVideoStudio },
+];
+
 // --- MOCK DATA ---
 const courses = [
   {
@@ -40,7 +63,7 @@ const courses = [
     subtitle: 'Tài liệu học quan trọng',
     description: 'Bộ tài liệu quan trọng nhất giúp Thầy Cô bắt đầu hành trình ứng dụng AI vào dạy học một cách bài bản, dễ hiểu và thực tiễn.',
     fullDescription: 'Chương trình đào tạo qua tài liệu chi tiết gồm 15 chương, tập trung vào 3 trụ cột cốt lõi: Làm nhanh việc bắt buộc (giáo án, đề thi), Làm tốt việc trên lớp (trò chơi, mô phỏng 3D), và Làm hay việc truyền đạt (video bài giảng).',
-    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
+    image: imgLessonPlanning,
     target: 'Giáo viên mới bắt đầu',
     price: '299.000đ',
     originalPrice: '699.000đ',
@@ -63,7 +86,7 @@ const courses = [
     subtitle: 'Khóa học E-Learning thực chiến',
     description: 'Làm chủ AI để soạn giáo án, tạo đề kiểm tra, viết SKKN, thiết kế slide tự động và tạo trợ lý ảo chuyên sâu.',
     fullDescription: 'Khóa học đào toàn diện kỹ năng sử dụng AI trong nghiệp vụ sư phạm hàng ngày, giúp giáo viên giải phóng sức lao động và nâng cao chất lượng giảng dạy.',
-    image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=1200&q=80',
+    image: imgHeroClassroom,
     target: 'Giáo viên mọi cấp học',
     price: '399.000đ',
     originalPrice: '1.500.000đ',
@@ -119,7 +142,7 @@ const courses = [
     subtitle: 'Làm chủ trọn bộ AI Sư phạm từ A-Z',
     description: 'Khóa học tổng lực bao gồm trọn vẹn 10 chuyên đề thực chiến: từ Nền tảng quan trọng, Nghiệp vụ soạn giảng, Tạo Slide, Trợ lý ảo, Trò chơi, Thí nghiệm ảo, Mô phỏng 3D, App giáo dục, Canva AI đến Tạo Video AI giáo dục.',
     fullDescription: 'Chương trình đào tạo AI toàn diện và chuyên sâu nhất dành cho giáo viên Việt Nam gồm 10 chuyên đề thực chiến "Cầm tay chỉ việc", tích hợp toàn bộ các năng lực số và công cụ AI tân tiến nhất hiện nay, giúp Thầy Cô tự động hóa công việc hành chính và đổi mới phương pháp giảng dạy.',
-    image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80',
+    image: imgWorkshopCoaching,
     target: 'Giáo viên mọi cấp học & Cán bộ quản lý',
     price: '999.000đ',
     originalPrice: '1.999.000đ',
@@ -223,7 +246,7 @@ const courses = [
     subtitle: 'Tạo Trò Chơi + 3D + Thí Nghiệm Ảo',
     description: 'Biến mọi tiết học thành sân chơi sáng tạo với kho trò chơi tương tác và mô phỏng 3D sinh động, cùng mô phỏng Thí Nghiệm ảo hấp dẫn.',
     fullDescription: 'Khóa học tập trung vào việc tạo ra các hoạt động học tập hiện đại, giúp học sinh hứng thú hơn thông qua các ứng dụng web và mô phỏng thực tế ảo.',
-    image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+    image: imgInteractiveGames,
     target: 'Giáo viên đổi mới sáng tạo',
     price: '399.000đ',
     originalPrice: '1.500.000đ',
@@ -290,7 +313,7 @@ const courses = [
     subtitle: 'Làm chủ Video AI + Canva + Games',
     description: 'Bộ 03 cuốn ebook thực chiến hướng dẫn chi tiết cách tự tay làm video AI, thiết kế Canva và trò chơi tương tác.',
     fullDescription: 'Thư viện cẩm nang giáo dục điện tử cầm tay chỉ việc, được cập nhật liên tục giúp giáo viên trở thành chuyên gia thiết kế học liệu số hiện đại.',
-    image: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?auto=format&fit=crop&w=1200&q=80',
+    image: imgVideoStudio,
     target: 'Giáo viên tự học & đổi mới sáng tạo',
     price: '399.000đ',
     originalPrice: '999.000đ',
@@ -349,7 +372,7 @@ const courses = [
     subtitle: '1-1, Nhóm hoặc Đội ngũ',
     description: 'Chương trình đào tạo cá nhân hóa theo sát nhu cầu thực tế của Thầy Cô hoặc đơn vị giáo dục.',
     fullDescription: 'Cung cấp các gói tư vấn và huấn luyện trực tiếp để giải quyết các vấn đề cụ thể về chuyển đổi số giáo dục và ứng dụng AI cho từng cá nhân hoặc tổ chức.',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    image: imgFounderPortrait,
     target: 'Cá nhân & Tổ chức giáo dục',
     price: 'Liên hệ',
     originalPrice: 'Tùy quy mô',
@@ -391,8 +414,8 @@ const testimonials = [
     name: 'Cô Nguyễn Thu Hà',
     role: 'Giáo viên Ngữ văn - THPT Chu Văn An',
     quote: 'Khóa học AI Toàn Diện đã thay đổi hoàn toàn cách tôi soạn bài. Trước đây mất 3 tiếng để chuẩn bị một giáo án chất lượng, nay chỉ còn 30 phút nhờ sự trợ giúp của AI.',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-    productImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=600&q=80',
+    avatar: imgAvatarFemale1,
+    productImage: imgLessonPlanning,
     productTag: 'Sản phẩm: Bộ KHBD 5512 Ngữ Văn & Tranh minh họa'
   },
   {
@@ -400,8 +423,8 @@ const testimonials = [
     name: 'Thầy Trần Minh Hoàng',
     role: 'Giảng viên - Đại học Sư phạm Hà Nội',
     quote: 'Nội dung tại EDUNEXA rất thực tế và có chiều sâu học thuật. Đây là nền tảng tốt nhất để các giảng viên tiếp cận với công nghệ giáo dục hiện đại một cách bài bản.',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    productImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80',
+    avatar: imgAvatarMale1,
+    productImage: imgScienceLab3d,
     productTag: 'Sản phẩm: Mô phỏng 3D Vật lý & Trắc nghiệm tự động'
   },
   {
@@ -409,8 +432,8 @@ const testimonials = [
     name: 'Cô Lê Thị Mai',
     role: 'Giáo viên Tiểu học - Vinschool',
     quote: 'Các trò chơi học tập tạo bằng AI khiến học sinh của tôi vô cùng hào hứng. Tiết học trở nên sôi nổi hơn bao giờ hết, và tôi cũng cảm thấy yêu nghề hơn khi có những trợ lý AI đắc lực.',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80',
-    productImage: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?auto=format&fit=crop&w=600&q=80',
+    avatar: imgAvatarFemale2,
+    productImage: imgInteractiveGames,
     productTag: 'Sản phẩm: Game khởi động tương tác & Video bài giảng'
   }
 ];
@@ -504,16 +527,20 @@ export default function App() {
       {/* HEADER */}
       <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-[#07111F]/95 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.4)] border-b border-slate-800/80' : 'bg-[#07111F]/80 backdrop-blur-sm border-b border-slate-800/30'}`}>
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex justify-between items-center h-[72px]">
+          <div className="flex justify-between items-center h-[76px]">
             {/* Logo */}
-            <div 
-              className="flex items-center cursor-pointer group"
+            <button 
+              type="button"
+              className="flex items-center gap-3 cursor-pointer group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F2C037] rounded-lg"
               onClick={() => navigateTo('home')}
+              aria-label="Trang chủ EDUNEXA"
             >
-              <span className="text-2xl lg:text-3xl font-black tracking-tight text-white font-display uppercase group-hover:text-[#F2C037] transition-colors">
-                EDUNEXA
-              </span>
-            </div>
+              <img 
+                src={EDUNEXA_LOGO} 
+                alt="Logo EDUNEXA - Empowering Minds. Bridging Futures." 
+                className="h-14 sm:h-[62px] w-auto object-contain drop-shadow-[0_2px_10px_rgba(231,185,54,0.22)] group-hover:scale-[1.03] transition-transform duration-200"
+              />
+            </button>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex space-x-8 items-center">
@@ -599,12 +626,19 @@ export default function App() {
                 transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
                 className="fixed top-0 right-0 bottom-0 w-[290px] bg-[#0B1628] text-white z-[70] md:hidden shadow-2xl flex flex-col border-l border-slate-800"
               >
-                <div className="p-6 flex justify-between items-center border-b border-slate-800">
-                  <div className="flex items-center">
-                    <span className="text-xl font-black tracking-tight text-white font-display uppercase">
-                      EDUNEXA
-                    </span>
-                  </div>
+                <div className="p-5 flex justify-between items-center border-b border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => navigateTo('home')}
+                    className="flex items-center"
+                    aria-label="Trang chủ EDUNEXA"
+                  >
+                    <img 
+                      src={EDUNEXA_LOGO} 
+                      alt="Logo EDUNEXA" 
+                      className="h-14 w-auto object-contain drop-shadow-[0_2px_8px_rgba(231,185,54,0.2)]"
+                    />
+                  </button>
                   <button 
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="p-2 rounded-lg bg-white/5 text-slate-300 hover:text-white transition-colors"
@@ -824,12 +858,18 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex flex-col items-start mb-6">
-              <div className="flex items-center mb-2">
-                <span className="text-3xl font-black tracking-tight text-white block font-display uppercase">
-                  EDUNEXA
-                </span>
-              </div>
-              <p className="text-slate-400 text-xs tracking-wider uppercase font-semibold">Empowering Minds. Bridging Futures.</p>
+              <button 
+                type="button" 
+                onClick={() => navigateTo('home')}
+                className="flex items-center mb-2 cursor-pointer group"
+                aria-label="Trang chủ EDUNEXA"
+              >
+                <img 
+                  src={EDUNEXA_LOGO} 
+                  alt="Logo EDUNEXA - Empowering Minds. Bridging Futures." 
+                  className="h-24 sm:h-28 w-auto object-contain drop-shadow-[0_4px_16px_rgba(231,185,54,0.25)] group-hover:scale-[1.02] transition-transform duration-200"
+                />
+              </button>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed max-w-md mb-6">
               Hệ thống các khóa học AI thực chiến dành riêng cho giáo viên, nhà trường và người làm giáo dục, hướng tới nâng cao năng lực nghề nghiệp, tiết kiệm thời gian soạn bài và đồng hành cùng chuyển đổi số.
@@ -1252,9 +1292,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                     <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
                     <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
                   </div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#E7B936]" />
-                    <span>AI Education Command Center</span>
+                  <div className="text-[11px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                    <img src={EDUNEXA_LOGO} alt="EDUNEXA" className="h-6 w-auto object-contain" />
+                    <span>EDUNEXA AI Workspace</span>
                   </div>
                   <div className="w-3" />
                 </div>
@@ -1264,9 +1304,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                   {/* Real Teacher with AI Workspace Image */}
                   <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden">
                     <img 
-                      src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=900&q=80" 
-                      alt="Giáo viên Việt Nam ứng dụng AI trong giảng dạy" 
-                      className="w-full h-full object-cover object-top filter brightness-[0.92] group-hover/img:scale-105 transition-transform duration-700 ease-out"
+                      src={imgHeroClassroom} 
+                      alt="Cô giáo Việt Nam mặc áo dài ứng dụng AI giảng dạy trước bảng tương tác" 
+                      className="w-full h-full object-cover object-top filter brightness-[0.94] group-hover/img:scale-105 transition-transform duration-700 ease-out"
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#06101F] via-[#06101F]/40 to-transparent" />
@@ -1390,9 +1430,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
             <motion.div variants={fadeUpCard} className="bg-white rounded-[22px] border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=700&q=80" 
-                  alt="Áp lực thời gian soạn bài" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={imgLessonPlanning} 
+                  alt="Cô giáo Việt Nam soạn giáo án và kế hoạch bài dạy trên laptop" 
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -1427,9 +1467,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
             <motion.div variants={fadeUpCard} className="bg-white rounded-[22px] border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=700&q=80" 
-                  alt="Dùng AI nhưng kết quả lúc đúng lúc sai" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={imgWorkshopCoaching} 
+                  alt="Thầy cô giáo Việt Nam trao đổi cách ứng dụng AI hiệu quả" 
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -1464,9 +1504,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
             <motion.div variants={fadeUpCard} className="bg-white rounded-[22px] border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=700&q=80" 
-                  alt="Khó làm video và học liệu trực quan" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={imgVideoStudio} 
+                  alt="Cô giáo Việt Nam làm video và học liệu số trực quan" 
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -1501,9 +1541,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
             <motion.div variants={fadeUpCard} className="bg-white rounded-[22px] border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=700&q=80" 
-                  alt="Rào cản lập trình và ứng dụng giáo dục" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={imgScienceLab3d} 
+                  alt="Cô giáo Việt Nam hướng dẫn học sinh mô phỏng 3D và ứng dụng giáo dục" 
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -1537,9 +1577,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
             <motion.div variants={fadeUpCard} className="bg-white rounded-[22px] border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between md:col-span-2 overflow-hidden group">
               <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full overflow-hidden bg-slate-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=900&q=80" 
-                  alt="Khối lượng hành chính và hồ sơ sổ sách quá tải" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={imgOverworkedDesk} 
+                  alt="Cô giáo Việt Nam với khối lượng hồ sơ sổ sách và giáo án cần xử lý" 
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -1635,28 +1675,28 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 step: 'BƯỚC 01',
                 title: 'XÁC ĐỊNH CÔNG VIỆC',
                 desc: 'Nhận diện chính xác nhiệm vụ đang lấy đi nhiều thời gian nhất của Thầy Cô trong tuần.',
-                image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=500&q=80',
+                image: imgOverworkedDesk,
                 icon: <Search className="w-5 h-5 text-[#B45309]" />
               },
               {
                 step: 'BƯỚC 02',
                 title: 'CHỌN QUY TRÌNH AI',
                 desc: 'Áp dụng bộ câu lệnh mẫu (Prompt) và trợ lý chuyên biệt đã được tối ưu cho từng bộ môn.',
-                image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=500&q=80',
+                image: imgWorkshopCoaching,
                 icon: <Workflow className="w-5 h-5 text-[#2563EB]" />
               },
               {
                 step: 'BƯỚC 03',
                 title: 'TẠO SẢN PHẨM',
                 desc: 'Tự động tạo kế hoạch bài dạy, slide, video, trò chơi, mô phỏng 3D hay app học tập.',
-                image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80',
+                image: imgVideoStudio,
                 icon: <Sparkles className="w-5 h-5 text-emerald-600" />
               },
               {
                 step: 'BƯỚC 04',
                 title: 'ỨNG DỤNG VÀO DẠY HỌC',
                 desc: 'Đưa ngay vào tiết học thực tế để học sinh tương tác hào hứng và giảm áp lực chuẩn bị.',
-                image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?auto=format&fit=crop&w=500&q=80',
+                image: imgHeroClassroom,
                 icon: <Presentation className="w-5 h-5 text-violet-600" />
               }
             ].map((st, idx) => (
@@ -1671,7 +1711,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                     <img 
                       src={st.image} 
                       alt={st.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" 
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -1734,7 +1774,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Dùng AI nhưng kết quả không ổn định, chưa biết cách viết prompt và quy trình chuẩn.',
                 solution: 'Làm chủ tư duy bối cảnh, cấu trúc prompt sư phạm và quy trình làm việc chuẩn mực.',
                 output: 'Khả năng giao tiếp chính xác với AI, nhận kết quả đúng chuyên môn ngay lần đầu.',
-                image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=700&q=80',
+                image: imgWorkshopCoaching,
                 icon: <BookOpenCheck className="w-5 h-5 text-[#B45309]" />
               },
               {
@@ -1743,7 +1783,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Giáo án, kế hoạch bài dạy (KHBD), câu hỏi và học liệu mất quá nhiều thời gian.',
                 solution: 'Tự động hóa soạn kế hoạch bài dạy chuẩn 5512, ngân hàng đề thi phân hóa và phiếu bài tập.',
                 output: 'Hoàn thành hồ sơ bài giảng và đề thi phân hóa trong 15 phút.',
-                image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=700&q=80',
+                image: imgLessonPlanning,
                 icon: <FileText className="w-5 h-5 text-[#2563EB]" />
               },
               {
@@ -1752,7 +1792,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Có nội dung nhưng mất nhiều giờ tìm ảnh, bố cục, thiết kế và chỉnh sửa trình chiếu.',
                 solution: 'Chuyển hóa dàn ý bài học thành slide trực quan, thẩm mỹ chuẩn sư phạm tự động.',
                 output: 'Bộ slide PowerPoint / Canva hoàn thiện, bố cục khoa học, tiết kiệm 80% công sức.',
-                image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=700&q=80',
+                image: imgHeroClassroom,
                 icon: <Presentation className="w-5 h-5 text-violet-600" />
               },
               {
@@ -1761,7 +1801,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Công việc hành chính lặp lại, tài liệu nhiều và muốn có trợ lý hỗ trợ theo nhu cầu riêng.',
                 solution: 'Huấn luyện trợ lý ảo thông minh nạp dữ liệu sách giáo khoa và tài liệu bộ môn của Thầy Cô.',
                 output: 'Trợ lý AI riêng biệt hỗ trợ giải đáp học sinh và gợi ý ý tưởng giảng dạy 24/7.',
-                image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=700&q=80',
+                image: imgFounderPortrait,
                 icon: <Bot className="w-5 h-5 text-emerald-600" />
               },
               {
@@ -1770,7 +1810,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Muốn học sinh hào hứng, tăng tương tác nhưng không biết kỹ thuật lập trình game.',
                 solution: 'Sử dụng AI tạo nhanh các trò chơi khởi động, câu hỏi củng cố và quiz tương tác lớp học.',
                 output: 'Kho mini game học tập vui nhộn kích thích 100% học sinh tham gia phát biểu.',
-                image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=700&q=80',
+                image: imgInteractiveGames,
                 icon: <Gamepad2 className="w-5 h-5 text-[#B45309]" />
               },
               {
@@ -1779,7 +1819,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Những thí nghiệm khó, tốn thiết bị, nguy hiểm hoặc không thuận tiện thực hiện trực tiếp.',
                 solution: 'Xây dựng phòng thí nghiệm ảo tương tác trực tiếp ngay trên trình duyệt web.',
                 output: 'Mô phỏng thí nghiệm Lý, Hóa, Sinh an toàn, trực quan, học sinh tự thao tác được.',
-                image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=700&q=80',
+                image: imgScienceLab3d,
                 icon: <FlaskConical className="w-5 h-5 text-[#2563EB]" />
               },
               {
@@ -1788,7 +1828,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Kiến thức không gian và khái niệm trừu tượng rất khó hình dung chỉ bằng hình ảnh tĩnh.',
                 solution: 'Biến công thức, sơ đồ và hiện tượng thành mô hình 3D xoay lật 360 độ.',
                 output: 'Học liệu 3D sinh động giúp học sinh hiểu sâu bản chất kiến thức.',
-                image: 'https://images.unsplash.com/photo-1633493106185-5b4cf594a501?auto=format&fit=crop&w=700&q=80',
+                image: imgScienceLab3d,
                 icon: <Box className="w-5 h-5 text-violet-600" />
               },
               {
@@ -1797,7 +1837,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Có ý tưởng ứng dụng phục vụ học tập nhưng bị cản trở vì không biết lập trình.',
                 solution: 'Quy trình sử dụng AI để tự tay xây dựng Web App giáo dục không cần viết mã.',
                 output: 'Ứng dụng học tập, tra cứu công thức, ôn tập riêng chia sẻ cho học sinh sử dụng.',
-                image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=700&q=80',
+                image: imgInteractiveGames,
                 icon: <Smartphone className="w-5 h-5 text-emerald-600" />
               },
               {
@@ -1806,7 +1846,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Thiết kế học liệu, poster và nội dung trực quan mất quá nhiều thời gian chuẩn bị.',
                 solution: 'Khai thác sức mạnh AI trong Canva để tự động tạo sơ đồ, infographic và ấn phẩm sư phạm.',
                 output: 'Bộ học liệu trực quan chuyên nghiệp, đồng nhất phong cách giảng dạy.',
-                image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=700&q=80',
+                image: imgLessonPlanning,
                 icon: <Palette className="w-5 h-5 text-[#B45309]" />
               },
               {
@@ -1815,7 +1855,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                 pain: 'Làm video bài giảng từ ý tưởng đến thành phẩm có quá nhiều bước phức tạp và tốn công.',
                 solution: 'Quy trình viết kịch bản, tạo hình ảnh nhân vật ảo và lồng tiếng tự nhiên bằng AI.',
                 output: 'Video bài giảng số sinh động có giáo viên số giảng bài tự nhiên, thu hút.',
-                image: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=700&q=80',
+                image: imgVideoStudio,
                 icon: <Video className="w-5 h-5 text-violet-600" />
               }
             ].map((item, idx) => (
@@ -1830,7 +1870,7 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
                     <img 
                       src={item.image} 
                       alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" 
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -2157,9 +2197,9 @@ function HomeView({ navigateTo, onSelectCourse, courses }: { navigateTo: (p: str
               <div className="lg:col-span-5 relative">
                 <div className="relative rounded-[22px] overflow-hidden aspect-[4/5] bg-slate-900 shadow-lg border border-slate-100 group">
                   <img 
-                    src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80" 
+                    src={imgFounderPortrait} 
                     alt="Thầy Trần Đông - Nhà sáng lập EDUNEXA" 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 filter brightness-95"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#07111F]/90 via-[#07111F]/20 to-transparent" />
@@ -2447,7 +2487,7 @@ function CourseCard({ course, navigateTo, onSelectCourse }: { course: any, navig
         <img 
           src={course.image} 
           alt={course.title} 
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" 
+          className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.03]" 
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
@@ -3250,7 +3290,7 @@ function AdminView({ courses, setCourses, isAdmin, setIsAdmin, navigateTo, admin
       price: formData.get('price') as string,
       originalPrice: formData.get('originalPrice') as string,
       target: formData.get('target') as string,
-      image: formData.get('image') as string || 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=800&q=80',
+      image: formData.get('image') as string || imgHeroClassroom,
       icon: editingCourse?.icon || <BookOpen className="w-6 h-6 text-[#E7B936]" />,
       pains: editingCourse?.pains || ['Mất thời gian soạn bài', 'Thiếu kỹ năng AI'],
       solutions: editingCourse?.solutions || ['Làm chủ công cụ AI', 'Tiết kiệm thời gian'],
@@ -3277,8 +3317,8 @@ function AdminView({ courses, setCourses, isAdmin, setIsAdmin, navigateTo, admin
           className="bg-white p-8 sm:p-10 rounded-[24px] shadow-xl w-full max-w-md border border-slate-200/80"
         >
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-[#07111F] rounded-2xl flex items-center justify-center text-[#E7B936] shadow-md border border-slate-700">
-              <Lock className="w-8 h-8" />
+            <div className="px-6 py-3.5 bg-[#07111F] rounded-2xl flex items-center justify-center shadow-md border border-[#E7B936]/30">
+              <img src={EDUNEXA_LOGO} alt="Logo EDUNEXA" className="h-16 w-auto object-contain" />
             </div>
           </div>
           <h2 className="text-2xl font-bold text-center text-[#07111F] mb-2 font-display">Khu Vực Quản Trị</h2>
@@ -3968,8 +4008,27 @@ function AdminView({ courses, setCourses, isAdmin, setIsAdmin, navigateTo, admin
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">URL Hình ảnh</label>
-                  <input name="image" defaultValue={editingCourse?.image} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#E7B936] text-sm text-[#07111F]" placeholder="https://..." />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Hình ảnh Thầy Cô giáo Việt Nam (URL hoặc chọn nhanh bên dưới)</label>
+                  <input id="admin-course-image-input" name="image" defaultValue={editingCourse?.image || imgHeroClassroom} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#E7B936] text-sm text-[#07111F]" placeholder="Mặc định dùng ảnh Thầy Cô giáo Việt Nam" />
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {VN_TEACHER_IMAGE_PRESETS.map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('admin-course-image-input') as HTMLInputElement | null;
+                          if (input) input.value = preset.url;
+                        }}
+                        className="group relative aspect-[16/10] rounded-lg overflow-hidden border border-slate-200 hover:border-[#E7B936] focus:outline-none focus:ring-2 focus:ring-[#E7B936] cursor-pointer"
+                        title={preset.label}
+                      >
+                        <img src={preset.url} alt={preset.label} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform" />
+                        <span className="absolute inset-x-0 bottom-0 bg-black/65 text-[10px] text-white font-medium px-1.5 py-0.5 truncate">
+                          {preset.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
