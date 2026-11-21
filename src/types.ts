@@ -34,6 +34,8 @@ export interface Course {
   curriculum: CurriculumItem[];
   gifts: string[];
   paymentInfo: string;
+  brochurePdfUrl?: string;
+  vietQrImageUrl?: string;
   status?: 'published' | 'hidden';
   featured?: boolean;
   displayOrder?: number;

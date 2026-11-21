@@ -227,7 +227,7 @@ export function CourseLandingView({
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3.5">
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={scrollToRegister}
@@ -246,6 +246,19 @@ export function CourseLandingView({
                   >
                     <MessageCircle className="w-4 h-4 text-[#16B8A6]" />
                     <span>Nhắn Zalo tư vấn</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+
+                {course.brochurePdfUrl && (
+                  <a
+                    href={course.brochurePdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3.5 min-h-[50px] bg-white/10 hover:bg-white/15 text-white border border-white/20 font-semibold text-sm rounded-xl transition-colors whitespace-nowrap"
+                  >
+                    <BookOpen className="w-4 h-4 text-[#F5BF35]" />
+                    <span>Xem tài liệu giới thiệu (PDF)</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
@@ -581,7 +594,9 @@ export function CourseLandingView({
                   <span>
                     {course.price === 'Liên hệ'
                       ? 'Đội ngũ EDUNEXA liên hệ trao đổi mục tiêu và báo phương án phù hợp.'
-                      : 'Chuyển khoản học phí qua mã VietQR Techcombank (hoặc đợi tư vấn qua Zalo trước khi chuyển khoản).'}
+                      : course.vietQrImageUrl?.includes('/mb-')
+                        ? 'Chuyển khoản ưu đãi qua mã VietQR MB Bank (hoặc đợi tư vấn qua Zalo trước khi chuyển khoản).'
+                        : 'Chuyển khoản học phí qua mã VietQR Techcombank (hoặc đợi tư vấn qua Zalo trước khi chuyển khoản).'}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -599,8 +614,12 @@ export function CourseLandingView({
                 <div className="flex flex-col items-center p-4 rounded-xl bg-[#102644] border border-white/10">
                   <div className="bg-white p-2.5 rounded-xl w-full max-w-[175px]">
                     <img
-                      src={VIETQR_IMAGE}
-                      alt="Mã VietQR thanh toán Techcombank EDUNEXA"
+                      src={course.vietQrImageUrl || VIETQR_IMAGE}
+                      alt={
+                        course.vietQrImageUrl?.includes('/mb-')
+                          ? 'Mã VietQR thanh toán MB Bank EDUNEXA'
+                          : 'Mã VietQR thanh toán Techcombank EDUNEXA'
+                      }
                       loading="lazy"
                       decoding="async"
                       className="w-full h-auto object-contain"
@@ -608,7 +627,9 @@ export function CourseLandingView({
                     />
                   </div>
                   <p className="text-xs text-slate-300 mt-2.5 text-center">
-                    Quét mã VietQR Techcombank (luồng thanh toán chính thức)
+                    {course.vietQrImageUrl?.includes('/mb-')
+                      ? 'Quét mã VietQR MB Bank (luồng thanh toán chính thức)'
+                      : 'Quét mã VietQR Techcombank (luồng thanh toán chính thức)'}
                   </p>
                 </div>
               )}

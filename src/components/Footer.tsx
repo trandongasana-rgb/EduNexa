@@ -68,37 +68,28 @@ export function Footer({ settings, navigateTo, scrollToSection }: FooterProps) {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToSection('gia-tri')}
-                  className="hover:text-[#F5BF35] transition-colors cursor-pointer"
-                >
-                  Giá trị cho giáo viên
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
                   onClick={() => scrollToSection('khoa-hoc')}
                   className="hover:text-[#F5BF35] transition-colors cursor-pointer"
                 >
-                  Các nhóm khóa học AI
+                  Khóa học & Học liệu AI
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToSection('san-pham')}
+                  onClick={() => scrollToSection('giang-vien')}
                   className="hover:text-[#F5BF35] transition-colors cursor-pointer"
                 >
-                  Sản phẩm thực hành
+                  Giảng viên & EDUNEXA
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToSection('lo-trinh')}
+                  onClick={() => scrollToSection('phan-hoi')}
                   className="hover:text-[#F5BF35] transition-colors cursor-pointer"
                 >
-                  Lộ trình 10 chuyên đề
+                  Cộng đồng Giáo viên AI
                 </button>
               </li>
               <li>
@@ -108,6 +99,15 @@ export function Footer({ settings, navigateTo, scrollToSection }: FooterProps) {
                   className="hover:text-[#F5BF35] transition-colors cursor-pointer"
                 >
                   Câu hỏi thường gặp
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => scrollToSection('dang-ky')}
+                  className="hover:text-[#F5BF35] transition-colors cursor-pointer"
+                >
+                  Đăng ký & Tư vấn lộ trình
                 </button>
               </li>
             </ul>

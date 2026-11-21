@@ -11,10 +11,6 @@ import {
   PlayCircle,
   Users,
   MessageCircle,
-  BookOpenCheck,
-  Presentation,
-  Boxes,
-  Clapperboard,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type {
@@ -35,7 +31,6 @@ import type {
 import {
   COURSE_CATEGORIES,
   HOMEPAGE_FAQS,
-  ROADMAP_MODULES,
   VIETQR_IMAGE,
 } from '../data/initialData';
 import { CourseCard } from './CourseCard';
@@ -62,13 +57,13 @@ interface HomeViewProps {
 }
 
 const FALLBACK_HERO_CONTENT: HeroContentConfig = {
-  kicker: 'Chương trình đào tạo ứng dụng AI cho giáo viên · EDUNEXA',
-  headlineLine1: 'HỌC AI THỰC CHIẾN.',
-  headlineLine2: 'TẠO HỌC LIỆU DÙNG ĐƯỢC NGAY.',
+  kicker: 'Học viện AI Thực Chiến Dành Riêng Cho Giáo Viên Việt Nam · EDUNEXA',
+  headlineLine1: 'Làm chủ AI trong dạy học.',
+  headlineLine2: 'Soạn bài nhanh, tiết học bứt phá.',
   description:
-    'Từ giáo án, slide, trò chơi tương tác đến video mô phỏng và ứng dụng giáo dục. Học theo quy trình thực hành, tạo sản phẩm phù hợp với công việc giảng dạy.',
-  primaryCtaLabel: 'KHÁM PHÁ KHÓA HỌC',
-  secondaryCtaLabel: 'XEM SẢN PHẨM THỰC TẾ',
+    'Ứng dụng AI bài bản vào mọi công việc của người thầy: giáo án chuẩn 5512, slide bài giảng, trò chơi tương tác, mô phỏng 3D và video giáo dục — thực hành là dùng được ngay trên lớp.',
+  primaryCtaLabel: 'Khám phá khóa học ngay',
+  secondaryCtaLabel: 'Nhận tư vấn lộ trình',
   trustPoints: [
     'Hướng dẫn bằng tiếng Việt từng bước',
     'Kèm bộ câu lệnh & tài liệu thực hành',
@@ -77,8 +72,8 @@ const FALLBACK_HERO_CONTENT: HeroContentConfig = {
 };
 
 const FALLBACK_INSTRUCTOR: InstructorConfig = {
-  kicker: '07 · Giảng viên & Học viện EDUNEXA',
-  heading: 'Đồng hành cùng giáo viên Việt Nam chuyển đổi số thực chất',
+  kicker: '02 · Người đồng hành cùng Thầy Cô',
+  heading: 'Từ thực tiễn lớp học Việt Nam đến lộ trình AI dễ học, dễ làm',
   name: 'Thầy Trần Đông (Trần Văn Đông)',
   roleLine: 'Nhà sáng lập EDUNEXA · Đào tạo ứng dụng AI trong giáo dục',
   bioParagraph1:
@@ -91,11 +86,11 @@ const FALLBACK_INSTRUCTOR: InstructorConfig = {
 };
 
 const DEFAULT_VISIBILITY: SectionVisibilityMap = {
-  'gia-tri': true,
+  'gia-tri': false,
   'khoa-hoc': true,
-  'san-pham': true,
-  'lo-trinh': true,
-  'quy-trinh': true,
+  'san-pham': false,
+  'lo-trinh': false,
+  'quy-trinh': false,
   'giang-vien': true,
   'phan-hoi': true,
   'hoi-dap': true,
@@ -109,90 +104,10 @@ const REVEAL_PROPS = {
   transition: { duration: 0.35 },
 };
 
-const TEACHER_VALUES = [
-  {
-    index: '01',
-    icon: BookOpenCheck,
-    title: 'Chuẩn hóa hồ sơ bài dạy & đề kiểm tra',
-    description:
-      'Xây dựng kế hoạch bài dạy chuẩn 5512, ma trận đề theo 4 mức độ nhận thức, phiếu học tập và khung sáng kiến kinh nghiệm rõ ràng.',
-  },
-  {
-    index: '02',
-    icon: Presentation,
-    title: 'Thiết kế slide & hoạt động lớp học sinh động',
-    description:
-      'Chuyển hóa dàn ý bài giảng thành slide trình chiếu mạch lạc cùng trò chơi khởi động, củng cố kiến thức giúp học sinh chủ động tham gia.',
-  },
-  {
-    index: '03',
-    icon: Boxes,
-    title: 'Xây dựng mô phỏng 3D, thí nghiệm ảo & Web App',
-    description:
-      'Minh họa trực quan kiến thức trừu tượng bằng mô hình 3D, thí nghiệm ảo và ứng dụng ôn tập chạy trên trình duyệt mà không cần tự viết code.',
-  },
-  {
-    index: '04',
-    icon: Clapperboard,
-    title: 'Sản xuất video bài giảng & trợ lý AI môn học',
-    description:
-      'Tạo video giáo dục có nhân vật minh họa, học liệu đồ họa Canva và trợ lý AI nạp tài liệu bộ môn phục vụ công việc giảng dạy hằng ngày.',
-  },
-];
-
-const LEARNING_STAGES = [
-  {
-    stage: 1 as const,
-    label: 'Giai đoạn 01',
-    title: 'Nền tảng AI & Nghiệp vụ soạn giảng',
-    subtitle: 'Chuyên đề 01 – 04',
-  },
-  {
-    stage: 2 as const,
-    label: 'Giai đoạn 02',
-    title: 'Trò chơi, Thí nghiệm ảo, 3D & Web App',
-    subtitle: 'Chuyên đề 05 – 08',
-  },
-  {
-    stage: 3 as const,
-    label: 'Giai đoạn 03',
-    title: 'Canva AI & Video AI Giáo dục',
-    subtitle: 'Chuyên đề 09 – 10',
-  },
-];
-
-const SUPPORT_STEPS = [
-  {
-    step: '01',
-    title: 'Chọn đúng chương trình theo nhu cầu',
-    description:
-      'Bắt đầu từ tài liệu nền tảng, chuyên đề soạn giảng, hoạt động lớp học, video bài giảng hoặc lộ trình toàn diện 10 chuyên đề.',
-  },
-  {
-    step: '02',
-    title: 'Học thực hành theo từng thao tác',
-    description:
-      'Theo dõi bài giảng tiếng Việt trực quan kèm mẫu câu lệnh chuẩn hóa và tài liệu hướng dẫn, chủ động xem lại khi cần.',
-  },
-  {
-    step: '03',
-    title: 'Tạo học liệu dùng ngay cho môn học',
-    description:
-      'Mỗi phần học đều hướng đến sản phẩm cụ thể (giáo án, slide, trò chơi, mô phỏng hoặc video) để áp dụng vào tiết dạy thực tế.',
-  },
-  {
-    step: '04',
-    title: 'Hỏi đáp & đồng hành qua nhóm Zalo',
-    description:
-      'Trao đổi trực tiếp vướng mắc kỹ thuật, cập nhật quy trình mới và chia sẻ kinh nghiệm cùng giảng viên và cộng đồng giáo viên.',
-  },
-];
-
 export function HomeView({
   courses,
   heroContent = FALLBACK_HERO_CONTENT,
   heroShowcase,
-  artifacts,
   testimonials,
   instructor = FALLBACK_INSTRUCTOR,
   faqs,
@@ -207,7 +122,6 @@ export function HomeView({
 }: HomeViewProps) {
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<CourseCategoryId>('ALL');
-  const [activeStage, setActiveStage] = useState<1 | 2 | 3>(1);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [selectedRegCourseId, setSelectedRegCourseId] = useState<string>(
     courses[0]?.id || 'ai-toan-dien-cho-giao-vien'
@@ -237,8 +151,6 @@ export function HomeView({
       ? courses
       : courses.filter((course) => course.categoryIds.includes(selectedCategory));
 
-  const stageModules = ROADMAP_MODULES.filter((m) => m.stage === activeStage);
-
   const selectedRegCourse =
     courses.find((c) => c.id === selectedRegCourseId) || courses[0];
 
@@ -252,20 +164,6 @@ export function HomeView({
   const founderPortraitSrc = instructor.portraitUrl || siteMedia.founderPortrait;
   const zaloHref = settings.zaloConsultUrl?.trim() || '';
   const paymentHref = settings.paymentUrl?.trim() || '';
-
-  const artifactSlides: LightboxSlide[] = useMemo(
-    () =>
-      artifacts.map((a) => ({
-        id: a.id,
-        image: a.image,
-        title: a.title,
-        category: a.category,
-        description: a.description,
-        courseId: a.courseId,
-        courseLabel: a.courseLabel,
-      })),
-    [artifacts]
-  );
 
   const gallerySlides: LightboxSlide[] = useMemo(
     () =>
@@ -298,7 +196,7 @@ export function HomeView({
                 {heroContent.kicker}
               </p>
 
-              <h1 className="text-[1.85rem] sm:text-5xl lg:text-[3.35rem] font-extrabold leading-[1.14] tracking-tight mb-5 sm:mb-6 break-words">
+              <h1 className="text-[1.85rem] sm:text-5xl lg:text-[3.35rem] font-extrabold leading-[1.14] tracking-tight mb-5 sm:mb-6 break-words text-balance">
                 <span className="block text-white">{heroContent.headlineLine1}</span>
                 <span className="block text-[#F5BF35] mt-1.5">
                   {heroContent.headlineLine2}
@@ -316,16 +214,16 @@ export function HomeView({
                   onClick={() => scrollToSection('khoa-hoc')}
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 min-h-[50px] bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] font-bold text-sm tracking-wide rounded-xl transition-colors duration-150 cursor-pointer whitespace-nowrap"
                 >
-                  <span>{heroContent.primaryCtaLabel || 'KHÁM PHÁ KHÓA HỌC'}</span>
+                  <span>{heroContent.primaryCtaLabel || 'Khám phá khóa học ngay'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => scrollToSection('san-pham')}
+                  onClick={() => scrollToSection('dang-ky')}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 min-h-[50px] bg-[#102644] hover:bg-[#16345C] text-white border border-white/15 font-semibold text-sm tracking-wide rounded-xl transition-colors duration-150 cursor-pointer whitespace-nowrap"
                 >
-                  <span>{heroContent.secondaryCtaLabel || 'XEM SẢN PHẨM THỰC TẾ'}</span>
+                  <span>{heroContent.secondaryCtaLabel || 'Nhận tư vấn lộ trình'}</span>
                 </button>
               </div>
 
@@ -420,74 +318,7 @@ export function HomeView({
       </section>
 
       {/* =================================================================
-          SECTION 02: GIÁ TRỊ MÀ GIÁO VIÊN NHẬN ĐƯỢC (White #FFFFFF)
-      ================================================================= */}
-      {vis['gia-tri'] && (
-        <section id="gia-tri" className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200/80">
-          <motion.div
-            {...REVEAL_PROPS}
-            className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-              <div className="lg:col-span-5">
-                <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2.5">
-                  02 · Giá trị cốt lõi
-                </p>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-4">
-                  Ứng dụng AI đúng quy trình cho công việc giảng dạy hằng ngày
-                </h2>
-                <p className="text-base text-slate-600 leading-relaxed mb-8">
-                  Thay vì thử nghiệm rời rạc hàng chục công cụ, chương trình tại EDUNEXA tập trung vào
-                  quy trình rõ ràng gắn trực tiếp với nhiệm vụ chuyên môn của giáo viên Việt Nam.
-                </p>
-
-                <div className="rounded-2xl overflow-hidden border border-slate-200 bg-[#F7F9FC]">
-                  <MediaFrame
-                    src={siteMedia.valueSectionImage}
-                    alt="Giáo viên Việt Nam thực hành ứng dụng AI trong giảng dạy cùng EDUNEXA"
-                    className="aspect-[16/10] w-full"
-                  />
-                  <div className="px-5 py-3.5 text-xs text-slate-600 border-t border-slate-200/80">
-                    Thực hành trực tiếp trên giáo án, học liệu và bài giảng của chính bộ môn Thầy Cô đang phụ trách.
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {TEACHER_VALUES.map((val) => {
-                  const Icon = val.icon;
-                  return (
-                    <div
-                      key={val.index}
-                      className="p-6 rounded-2xl bg-[#F7F9FC] border border-slate-200/80 hover:border-slate-300 transition-colors flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#081426]">
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-400 tabular-nums">
-                            {val.index}
-                          </span>
-                        </div>
-                        <h3 className="text-base sm:text-lg font-bold text-[#081426] mb-2 leading-snug">
-                          {val.title}
-                        </h3>
-                        <p className="text-sm text-slate-600 leading-relaxed">
-                          {val.description}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        </section>
-      )}
-
-      {/* =================================================================
-          SECTION 03: CÁC NHÓM KHÓA HỌC AI (Light #F7F9FC)
+          SECTION 01: CÁC NHÓM KHÓA HỌC & HỌC LIỆU AI (Light #F7F9FC)
       ================================================================= */}
       {vis['khoa-hoc'] && (
         <section id="khoa-hoc" className="py-16 sm:py-20 lg:py-24 bg-[#F7F9FC] border-b border-slate-200/80">
@@ -498,13 +329,13 @@ export function HomeView({
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
               <div className="max-w-2xl">
                 <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2.5">
-                  03 · Chương trình đào tạo
+                  01 · Khóa học & Học liệu AI
                 </p>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3">
-                  Các nhóm khóa học AI cho giáo viên
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3 text-balance">
+                  Chọn đúng khóa học AI để nhẹ gánh soạn bài, nâng tầm tiết dạy
                 </h2>
                 <p className="text-base text-slate-600 leading-relaxed">
-                  Lọc theo đúng nhu cầu giảng dạy của Thầy Cô: soạn giáo án, thiết kế slide, trò chơi & mô phỏng, video AI hoặc ứng dụng & trợ lý AI.
+                  Lọc nhanh theo đúng nhu cầu của Thầy Cô: soạn giáo án, thiết kế slide, trò chơi & mô phỏng 3D, video bài giảng hay trọn bộ 23 Siêu SKILL AI.
                 </p>
               </div>
 
@@ -590,231 +421,7 @@ export function HomeView({
       )}
 
       {/* =================================================================
-          SECTION 04: GALLERY HỌC LIỆU THỰC HÀNH (White #FFFFFF)
-      ================================================================= */}
-      {vis['san-pham'] && (
-        <section id="san-pham" className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200/80">
-          <motion.div
-            {...REVEAL_PROPS}
-            className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10"
-          >
-            <div className="max-w-2xl mb-12">
-              <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2.5">
-                04 · Đầu ra thực hành
-              </p>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3">
-                Sản phẩm giáo viên có thể thực hành tạo ra
-              </h2>
-              <p className="text-base text-slate-600 leading-relaxed">
-                Mỗi chuyên đề hướng tới học liệu cụ thể có thể biên tập lại theo sách giáo khoa và bộ
-                môn. Nhấn vào từng ảnh để xem phóng to trong thư viện học liệu.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-              {artifacts.map((artifact, idx) => (
-                <article
-                  key={artifact.id}
-                  className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden flex flex-col group hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(8,20,38,0.07)] transition-all duration-200"
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLightboxSlides(artifactSlides);
-                      setLightboxIndex(idx);
-                    }}
-                    className="relative block w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5BF35]"
-                    aria-label={`Xem phóng to học liệu: ${artifact.title}`}
-                  >
-                    <MediaFrame
-                      src={artifact.image}
-                      alt={`${artifact.title} — ${artifact.category} EDUNEXA`}
-                      className="aspect-[16/10] w-full"
-                      imgClassName="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                    <span className="absolute bottom-3 right-3 w-8 h-8 rounded-lg bg-[#081426]/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Expand className="w-4 h-4" />
-                    </span>
-                  </button>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <p className="text-xs font-semibold text-[#0D9488] mb-1.5">
-                      {artifact.category}
-                    </p>
-                    <h3 className="text-base sm:text-lg font-bold text-[#081426] leading-snug mb-2">
-                      {artifact.title}
-                    </h3>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-5 flex-grow">
-                      {artifact.description}
-                    </p>
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                      <span className="text-xs text-slate-500 truncate">
-                        {artifact.courseLabel}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => navigateTo(`course-${artifact.courseId}`)}
-                        className="text-xs font-bold text-[#081426] hover:text-[#0D9488] inline-flex items-center gap-1 shrink-0 cursor-pointer"
-                      >
-                        <span>Xem khóa</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-      )}
-
-      {/* =================================================================
-          SECTION 05: LỘ TRÌNH HỌC TỪNG BƯỚC (Navy #081426)
-      ================================================================= */}
-      {vis['lo-trinh'] && (
-        <section id="lo-trinh" className="py-16 sm:py-20 lg:py-24 bg-[#081426] text-white border-b border-white/10">
-          <motion.div
-            {...REVEAL_PROPS}
-            className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10"
-          >
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
-              <div className="max-w-2xl">
-                <p className="text-xs font-semibold text-[#16B8A6] tracking-wide mb-2.5">
-                  05 · Lộ trình 10 chuyên đề
-                </p>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3">
-                  Lộ trình học từng bước từ nền tảng đến sản phẩm hoàn chỉnh
-                </h2>
-                <p className="text-base text-slate-300 leading-relaxed">
-                  Hệ thống 10 chuyên đề được sắp xếp theo trình tự thực tế: làm chủ nền tảng và soạn
-                  giảng trước, sau đó mở rộng sang trò chơi, mô phỏng 3D, Web App và video AI giáo dục.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => navigateTo('course-ai-toan-dien-cho-giao-vien')}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[46px] bg-[#F5BF35] hover:bg-[#E2AB22] text-[#081426] font-bold text-sm rounded-xl transition-colors cursor-pointer shrink-0 w-fit"
-              >
-                <span>Xem trọn bộ 10 chuyên đề</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8" role="tablist">
-              {LEARNING_STAGES.map((st) => {
-                const isActive = activeStage === st.stage;
-                return (
-                  <button
-                    key={st.stage}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setActiveStage(st.stage)}
-                    className={`text-left p-5 rounded-xl border transition-colors cursor-pointer ${
-                      isActive
-                        ? 'bg-[#102644] border-[#F5BF35] text-white'
-                        : 'bg-[#0C1D35] border-white/10 text-slate-300 hover:border-white/25'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className={isActive ? 'text-[#F5BF35] font-bold' : 'text-slate-400 font-semibold'}>
-                        {st.label}
-                      </span>
-                      <span className="text-slate-400 tabular-nums">{st.subtitle}</span>
-                    </div>
-                    <div className="text-sm sm:text-base font-bold text-white leading-snug">
-                      {st.title}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <motion.div
-              key={activeStage}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-5"
-            >
-              {stageModules.map((mod) => (
-                <div
-                  key={mod.num}
-                  className="p-6 rounded-2xl bg-[#102644] border border-white/10 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-sm font-extrabold text-[#F5BF35] tabular-nums">
-                        Chuyên đề {mod.num}
-                      </span>
-                      <span className="h-px flex-1 bg-white/10" aria-hidden="true" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-2 leading-snug">
-                      {mod.title}
-                    </h3>
-                    <p className="text-sm text-slate-300 leading-relaxed mb-4">
-                      {mod.summary}
-                    </p>
-                  </div>
-                  <div className="pt-3.5 border-t border-white/10 text-xs sm:text-sm text-slate-200 flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[#16B8A6] mt-0.5 shrink-0" />
-                    <span>
-                      <strong className="text-white font-semibold">Đầu ra:</strong> {mod.output}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </section>
-      )}
-
-      {/* =================================================================
-          SECTION 06: QUY TRÌNH HỌC VÀ HỖ TRỢ (Light #F7F9FC)
-      ================================================================= */}
-      {vis['quy-trinh'] && (
-        <section id="quy-trinh" className="py-16 sm:py-20 lg:py-24 bg-[#F7F9FC] border-b border-slate-200/80">
-          <motion.div
-            {...REVEAL_PROPS}
-            className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10"
-          >
-            <div className="max-w-2xl mb-12">
-              <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2.5">
-                06 · Phương pháp đồng hành
-              </p>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3">
-                Quy trình học và hỗ trợ tại EDUNEXA
-              </h2>
-              <p className="text-base text-slate-600 leading-relaxed">
-                Thiết kế để giáo viên bận rộn vẫn theo kịp tiến độ, chủ động thực hành lại và có kênh
-                hỏi đáp rõ ràng khi triển khai vào lớp học.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {SUPPORT_STEPS.map((item) => (
-                <div
-                  key={item.step}
-                  className="bg-white p-6 rounded-2xl border border-slate-200/90 flex flex-col"
-                >
-                  <span className="text-2xl font-extrabold text-[#F5BF35] tabular-nums mb-4">
-                    {item.step}
-                  </span>
-                  <h3 className="text-base font-bold text-[#081426] mb-2 leading-snug">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-      )}
-
-      {/* =================================================================
-          SECTION 07: GIỚI THIỆU GIẢNG VIÊN VÀ EDUNEXA (White #FFFFFF)
+          SECTION 02: GIỚI THIỆU GIẢNG VIÊN VÀ EDUNEXA (White #FFFFFF)
       ================================================================= */}
       {vis['giang-vien'] && (
         <section id="giang-vien" className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200/80">
@@ -922,7 +529,7 @@ export function HomeView({
       )}
 
       {/* =================================================================
-          SECTION 08: CỘNG ĐỒNG & PHẢN HỒI CÓ NGUỒN THỰC TẾ (Light #F7F9FC)
+          SECTION 03: CỘNG ĐỒNG & PHẢN HỒI CÓ NGUỒN THỰC TẾ (Light #F7F9FC)
       ================================================================= */}
       {vis['phan-hoi'] && (
         <section id="phan-hoi" className="py-16 sm:py-20 lg:py-24 bg-[#F7F9FC] border-b border-slate-200/80">
@@ -933,10 +540,10 @@ export function HomeView({
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
               <div className="max-w-2xl">
                 <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2.5">
-                  08 · Cộng đồng & Phản hồi xác thực
+                  03 · Cộng đồng Giáo viên AI EDUNEXA
                 </p>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3">
-                  Kết nối trực tiếp cùng Cộng đồng Giáo viên AI EDUNEXA
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3 text-balance">
+                  Không học một mình — Đồng hành trực tiếp cùng Cộng đồng Giáo viên AI EDUNEXA
                 </h2>
                 <p className="text-base text-slate-600 leading-relaxed">
                   EDUNEXA chỉ đăng tải chia sẻ thực tế có nguồn đối chiếu rõ ràng. Thầy Cô có thể
@@ -1201,7 +808,7 @@ export function HomeView({
       })}
 
       {/* =================================================================
-          SECTION 09: CÂU HỎI THƯỜNG GẶP (White #FFFFFF)
+          SECTION 04: CÂU HỎI THƯỜNG GẶP (White #FFFFFF)
       ================================================================= */}
       {vis['hoi-dap'] && (
         <section id="hoi-dap" className="py-16 sm:py-20 lg:py-24 bg-white border-b border-slate-200/80">
@@ -1211,13 +818,13 @@ export function HomeView({
           >
             <div className="mb-10">
               <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2.5">
-                09 · Giải đáp thắc mắc
+                04 · Giải đáp trước khi bắt đầu
               </p>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3">
-                Câu hỏi thường gặp
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#081426] leading-tight mb-3 text-balance">
+                Thầy Cô băn khoăn gì trước khi học AI cùng EDUNEXA?
               </h2>
               <p className="text-base text-slate-600 leading-relaxed">
-                Những thông tin Thầy Cô thường quan tâm trước khi lựa chọn chương trình học.
+                Những câu hỏi thực tế nhất Thầy Cô thường quan tâm trước khi chọn khóa học hoặc học liệu phù hợp.
               </p>
             </div>
 
@@ -1264,20 +871,20 @@ export function HomeView({
       )}
 
       {/* =================================================================
-          SECTION 10: KHU VỰC ĐĂNG KÝ CUỐI TRANG (Navy #081426)
+          SECTION 05: KHU VỰC ĐĂNG KÝ CUỐI TRANG (Navy #081426)
       ================================================================= */}
       {vis['dang-ky'] && (
         <section id="dang-ky" className="py-16 sm:py-20 lg:py-24 bg-[#081426] text-white">
           <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
             <div className="max-w-2xl mb-10">
               <p className="text-xs font-semibold text-[#16B8A6] tracking-wide mb-2.5">
-                10 · Đăng ký tham gia & Tư vấn lộ trình
+                05 · Bắt đầu ngay hôm nay
               </p>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3">
-                Đăng ký khóa học AI phù hợp cho môn học của Thầy Cô
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3 text-balance">
+                Đăng ký khóa học phù hợp — Rút ngắn thời gian soạn giảng ngay tuần này
               </h2>
               <p className="text-base text-slate-300 leading-relaxed">
-                Chọn khóa học, để lại thông tin liên hệ và xác nhận chính sách xử lý thông tin. Hệ
+                Chọn khóa học hoặc học liệu số, để lại thông tin liên hệ và xác nhận chính sách xử lý thông tin. Hệ
                 thống lưu trực tiếp hồ sơ đăng ký và xác nhận ngay sau khi gửi thành công.
               </p>
             </div>
@@ -1362,8 +969,12 @@ export function HomeView({
                         <div className="sm:col-span-5 flex flex-col items-center">
                           <div className="bg-white p-2.5 rounded-xl w-full max-w-[170px]">
                             <img
-                              src={VIETQR_IMAGE}
-                              alt="Mã VietQR thanh toán Techcombank EDUNEXA"
+                              src={selectedRegCourse.vietQrImageUrl || VIETQR_IMAGE}
+                              alt={
+                                selectedRegCourse.vietQrImageUrl
+                                  ? 'Mã VietQR thanh toán MB Bank EDUNEXA'
+                                  : 'Mã VietQR thanh toán Techcombank EDUNEXA'
+                              }
                               loading="lazy"
                               decoding="async"
                               className="w-full h-auto object-contain"
@@ -1371,7 +982,9 @@ export function HomeView({
                             />
                           </div>
                           <p className="text-[11px] text-slate-300 mt-2 text-center">
-                            Quét mã VietQR Techcombank
+                            {selectedRegCourse.vietQrImageUrl
+                              ? 'Quét mã VietQR MB Bank'
+                              : 'Quét mã VietQR Techcombank'}
                           </p>
                         </div>
                       )}

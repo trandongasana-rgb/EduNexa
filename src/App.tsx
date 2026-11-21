@@ -47,13 +47,13 @@ const AdminView = lazy(() =>
 function buildInitialFallbackSnapshot(): CmsSnapshot {
   return {
     heroContent: {
-      kicker: 'Chương trình đào tạo ứng dụng AI cho giáo viên · EDUNEXA',
-      headlineLine1: 'HỌC AI THỰC CHIẾN.',
-      headlineLine2: 'TẠO HỌC LIỆU DÙNG ĐƯỢC NGAY.',
+      kicker: 'Học viện AI Thực Chiến Dành Riêng Cho Giáo Viên Việt Nam · EDUNEXA',
+      headlineLine1: 'Làm chủ AI trong dạy học.',
+      headlineLine2: 'Soạn bài nhanh, tiết học bứt phá.',
       description:
-        'Từ giáo án, slide, trò chơi tương tác đến video mô phỏng và ứng dụng giáo dục. Học theo quy trình thực hành, tạo sản phẩm phù hợp với công việc giảng dạy.',
-      primaryCtaLabel: 'KHÁM PHÁ KHÓA HỌC',
-      secondaryCtaLabel: 'XEM SẢN PHẨM THỰC TẾ',
+        'Ứng dụng AI bài bản vào mọi công việc của người thầy: giáo án chuẩn 5512, slide bài giảng, trò chơi tương tác, mô phỏng 3D và video giáo dục — thực hành là dùng được ngay trên lớp.',
+      primaryCtaLabel: 'Khám phá khóa học ngay',
+      secondaryCtaLabel: 'Nhận tư vấn lộ trình',
       trustPoints: [
         'Hướng dẫn bằng tiếng Việt từng bước',
         'Kèm bộ câu lệnh & tài liệu thực hành',
@@ -64,14 +64,14 @@ function buildInitialFallbackSnapshot(): CmsSnapshot {
     courses: DEFAULT_COURSES.map((c, idx) => ({
       ...c,
       status: 'published',
-      featured: idx === 0,
-      displayOrder: (idx + 1) * 10,
+      featured: c.featured ?? idx === 0,
+      displayOrder: c.displayOrder ?? (idx + 1) * 10,
     })),
     artifacts: DEFAULT_STUDENT_ARTIFACTS,
     testimonials: DEFAULT_TESTIMONIALS,
     instructor: {
-      kicker: '07 · Giảng viên & Học viện EDUNEXA',
-      heading: 'Đồng hành cùng giáo viên Việt Nam chuyển đổi số thực chất',
+      kicker: '02 · Người đồng hành cùng Thầy Cô',
+      heading: 'Từ thực tiễn lớp học Việt Nam đến lộ trình AI dễ học, dễ làm',
       name: 'Thầy Trần Đông (Trần Văn Đông)',
       roleLine: 'Nhà sáng lập EDUNEXA · Đào tạo ứng dụng AI trong giáo dục',
       bioParagraph1:
@@ -84,11 +84,11 @@ function buildInitialFallbackSnapshot(): CmsSnapshot {
     },
     faqs: HOMEPAGE_FAQS.map((f, idx) => ({ id: `faq-${idx + 1}`, q: f.q, a: f.a })),
     sectionVisibility: {
-      'gia-tri': true,
+      'gia-tri': false,
       'khoa-hoc': true,
-      'san-pham': true,
-      'lo-trinh': true,
-      'quy-trinh': true,
+      'san-pham': false,
+      'lo-trinh': false,
+      'quy-trinh': false,
       'giang-vien': true,
       'phan-hoi': true,
       'hoi-dap': true,
@@ -329,7 +329,8 @@ export default function App() {
   // Dynamic per-page SEO, Open Graph, Canonical URL, and Schema.org JSON-LD
   useEffect(() => {
     const s = activeSnapshot.settings;
-    const baseTitle = s.siteName || 'EDUNEXA AI — Đào Tạo Ứng Dụng AI Thực Chiến Cho Giáo Viên';
+    const baseTitle =
+      s.siteName || 'EDUNEXA AI — Làm Chủ AI Trong Dạy Học, Soạn Giảng Nhanh & Sáng Tạo Vượt Trội';
     const baseDesc =
       s.siteDescription ||
       'Học AI thực chiến dành cho giáo viên Việt Nam: tạo giáo án chuẩn 5512, slide bài giảng, trò chơi tương tác, mô phỏng 3D, Web App và video AI giáo dục.';

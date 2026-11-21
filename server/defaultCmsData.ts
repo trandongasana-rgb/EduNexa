@@ -8,19 +8,23 @@ const IMG_INTERACTIVE_GAMES = '/site-assets/vn_teacher_interactive_games_1795059
 const IMG_SCIENCE_LAB_3D = '/site-assets/vn_teacher_science_lab_3d_1795059326436.jpg';
 const IMG_VIDEO_STUDIO = '/site-assets/vn_teacher_video_studio_1795059324657.jpg';
 const IMG_WORKSHOP_COACHING = '/site-assets/vn_teacher_workshop_coaching_1795059323779.jpg';
+const IMG_HL10_COVER = '/assets/hl10-bo-23-sieu-skill-cover.webp';
+const IMG_HL10_OVERVIEW = '/assets/hl10-bo-23-sieu-skill-overview.webp';
+const HL10_BROCHURE_PDF = '/assets/aistudio/HL10_-_B__23_SI_U_TR__L__040a6e92.pdf';
+const MB_VIETQR_IMAGE = 'https://img.vietqr.io/image/mb-535866668888-compact.jpg';
 
 const DEFAULT_REGISTER_FORM = 'https://forms.gle/drgKvsnKvkACEHbe7';
 
 export function buildDefaultCmsSnapshot(): CmsSnapshot {
   return {
     heroContent: {
-      kicker: 'Chương trình đào tạo ứng dụng AI cho giáo viên · EDUNEXA',
-      headlineLine1: 'HỌC AI THỰC CHIẾN.',
-      headlineLine2: 'TẠO HỌC LIỆU DÙNG ĐƯỢC NGAY.',
+      kicker: 'Học viện AI Thực Chiến Dành Riêng Cho Giáo Viên Việt Nam · EDUNEXA',
+      headlineLine1: 'Làm chủ AI trong dạy học.',
+      headlineLine2: 'Soạn bài nhanh, tiết học bứt phá.',
       description:
-        'Từ giáo án, slide, trò chơi tương tác đến video mô phỏng và ứng dụng giáo dục. Học theo quy trình thực hành, tạo sản phẩm phù hợp với công việc giảng dạy.',
-      primaryCtaLabel: 'KHÁM PHÁ KHÓA HỌC',
-      secondaryCtaLabel: 'XEM SẢN PHẨM THỰC TẾ',
+        'Ứng dụng AI bài bản vào mọi công việc của người thầy: giáo án chuẩn 5512, slide bài giảng, trò chơi tương tác, mô phỏng 3D và video giáo dục — thực hành là dùng được ngay trên lớp.',
+      primaryCtaLabel: 'Khám phá khóa học ngay',
+      secondaryCtaLabel: 'Nhận tư vấn lộ trình',
       trustPoints: [
         'Hướng dẫn bằng tiếng Việt từng bước',
         'Kèm bộ câu lệnh & tài liệu thực hành',
@@ -173,6 +177,175 @@ export function buildDefaultCmsSnapshot(): CmsSnapshot {
         ],
         paymentInfo:
           'Techcombank (TCB) - STK: 88.3558.3558 - Chủ TK: CONG TY TNHH MTV GIAO DUC EDUNEXA - Nội dung: hoten + sdt + AI TOAN DIEN',
+      },
+      {
+        id: 'hoc-lieu-so-10-bo-23-sieu-skill',
+        title: 'Học Liệu Số 10: Bộ 23 Siêu SKILL AI Toàn Diện Cho Giáo Viên',
+        subtitle: 'Trọn bộ 23 File SKILL cài thẳng trên ChatGPT & Gemini + Nhóm Zalo đồng hành',
+        categoryIds: [
+          'UNG_DUNG_TRO_LY',
+          'SOAN_GIAO_AN',
+          'SLIDE_AI',
+          'TRO_CHOI_MO_PHONG',
+          'VIDEO_AI',
+          'TAI_LIEU_CAM_NANG',
+        ],
+        description:
+          'Trọn bộ 23 Siêu SKILL AI chuyên biệt dành cho giáo viên Việt Nam, cài trực tiếp trên ChatGPT & Gemini để soạn giáo án, tích hợp Năng lực số, viết SKKN, lập ma trận & đề kiểm tra, thiết kế slide bám sát SGK, tạo trò chơi, mô phỏng 3D, App giáo dục và video bài giảng.',
+        fullDescription:
+          'Học Liệu Số 10 là bộ 23 File SKILL AI thực chiến do Thầy Trần Đông thiết kế và đóng gói sẵn cho cả ChatGPT và Gemini. Thay vì phải tự viết lại những câu lệnh dài mỗi lần soạn bài, giáo viên chỉ cần gọi đúng Siêu SKILL theo từng nhiệm vụ giảng dạy (từ soạn giáo án CTGDPT 2018, tích hợp mã Năng lực số & AI, viết SKKN 6 bước, lập ma trận & bảng đặc tả chuẩn TT27/TT22/CV7991, thiết kế slide E-Learning/SGK, tách layer tạo hiệu ứng PowerPoint đến làm trò chơi, mô phỏng 3D, App giáo dục và 6 dòng video AI) kèm nhóm Zalo đồng hành và 03 phần quà tài nguyên đặc biệt.',
+        outcome:
+          'Sở hữu trọn bộ 23 File SKILL chạy trực tiếp trên ChatGPT & Gemini, làm chủ quy trình tạo toàn diện học liệu số cho mọi cấp học từ Mầm non, Tiểu học, THCS, THPT đến Đại học.',
+        image: IMG_HL10_COVER,
+        brochurePdfUrl: HL10_BROCHURE_PDF,
+        vietQrImageUrl: MB_VIETQR_IMAGE,
+        target: 'Giáo viên Mầm non, Tiểu học, THCS, THPT, Đại học & Tổ chuyên môn',
+        price: '399.000đ',
+        originalPrice: '999.000đ',
+        registerUrl: DEFAULT_REGISTER_FORM,
+        status: 'published',
+        featured: true,
+        displayOrder: 15,
+        benefits: [
+          'Đầy đủ trọn bộ 23 File SKILL cài đặt và sử dụng trực tiếp trên cả ChatGPT và Gemini',
+          'Bao phủ toàn diện công việc giáo viên: Giáo án, Khởi động, Năng lực số & AI, SKKN, Ma trận & Đề kiểm tra, Slide, Trò chơi, Mô phỏng 3D, App giáo dục và Video',
+          'Kèm quy trình sử dụng chi tiết theo từng bước, dễ áp dụng, không cần biết lập trình',
+          'Tham gia Nhóm Zalo đồng hành nhận cập nhật học liệu, prompt và giải đáp trực tiếp',
+        ],
+        pains: [
+          'Mất nhiều thời gian viết lại câu lệnh (prompt) mỗi lần soạn bài nhưng kết quả AI vẫn rời rạc, chưa bám sát CTGDPT 2018 và SGK.',
+          'Gặp khó khăn khi tích hợp mã Năng lực số (NLS) & AI vào giáo án, lập ma trận/bảng đặc tả chuẩn TT27, TT22, CV7991 hoặc triển khai SKKN có minh chứng.',
+          'Muốn thiết kế slide bám sát SGK, bài giảng E-Learning, tách layer tạo hiệu ứng PowerPoint, làm trò chơi tương tác, mô phỏng 3D hay video giáo dục nhưng thiếu quy trình chuẩn.',
+        ],
+        solutions: [
+          'Đóng gói sẵn 23 File SKILL chuyên sâu theo đúng nghiệp vụ sư phạm Việt Nam, dùng ngay trên ChatGPT và Gemini.',
+          'Mỗi SKILL có quy trình đầu vào – xử lý – xuất sản phẩm rõ ràng (Word, Excel, PPTX, ZIP PNG, kịch bản video, mã mô phỏng).',
+          'Có sẵn SKILL 11 giúp giáo viên tự tạo thêm các SKILL cá nhân hóa riêng cho môn học, cấp học và tổ chuyên môn.',
+        ],
+        curriculum: [
+          {
+            mod: 'SKILL 01',
+            title: 'Siêu SKILL Soạn giáo án chi tiết',
+            desc: 'Thiết kế giáo án bám CTGDPT 2018, đầy đủ mục tiêu, hoạt động dạy học 2 cột, kiểm tra đánh giá và xuất file Word dùng ngay trên ChatGPT & Gemini.',
+          },
+          {
+            mod: 'SKILL 02',
+            title: 'Siêu SKILL Tạo hoạt động khởi động bài học',
+            desc: 'Đề xuất 5 phương án khởi động kèm kịch bản từng phút (GV nói và làm – HS thực hiện – Sản phẩm), trò chơi, câu hỏi gợi mở và bản offline.',
+          },
+          {
+            mod: 'SKILL 03',
+            title: 'Siêu SKILL Tích hợp Năng lực số và AI vào giáo án',
+            desc: 'Đối chiếu khung Năng lực số & CV 3456/5588, tự động bổ sung mã NLS và mục tiêu giáo dục AI trực tiếp vào giáo án gốc.',
+          },
+          {
+            mod: 'SKILL 04',
+            title: 'Siêu SKILL Viết SKKN chuyên sâu từ A đến Z',
+            desc: 'Quy trình 6 bước chuẩn: khai phá đề tài → lập đề cương → viết nội dung chi tiết → xử lý số liệu, minh chứng → hoàn thiện và kiểm tra đạt yêu cầu.',
+          },
+          {
+            mod: 'SKILL 05',
+            title: 'Siêu SKILL Xây dựng ma trận đề kiểm tra và bảng đặc tả',
+            desc: 'Chuẩn TT27, TT22, CV 7991 cho Tiểu học, THCS, THPT; truy vết YCCĐ, tính số câu/điểm/tỉ lệ, thẩm định lỗi và xuất Word/Excel.',
+          },
+          {
+            mod: 'SKILL 06',
+            title: 'Siêu SKILL Tạo đề kiểm tra tự động các cấp các môn',
+            desc: 'Tạo đề theo đúng ma trận và đặc tả với đủ dạng TNKQ, Đúng–Sai, Trả lời ngắn, Tự luận; tạo nhiều mã đề, đáp án chi tiết và xuất Word/PDF.',
+          },
+          {
+            mod: 'SKILL 07',
+            title: 'Siêu SKILL Tạo prompt slide trên Gemini',
+            desc: 'Quy trình 4 bước lập dàn ý và tạo prompt chuẩn cho Gemini Canvas, gợi ý bố cục, màu sắc và xuất slide tự động cho nhiều môn học.',
+          },
+          {
+            mod: 'SKILL 08',
+            title: 'Siêu SKILL Tạo slide ảnh trên ChatGPT',
+            desc: 'Tạo bộ slide ảnh độc lập 16:9 bám sát SGK và giáo án chuẩn 2345/5512, đa dạng phong cách 3D/Infographic, xuất PPTX và ZIP PNG.',
+          },
+          {
+            mod: 'SKILL 09',
+            title: 'Siêu SKILL Thiết kế slide bài giảng E-Learning',
+            desc: 'Xây dựng kịch bản, storyboard, thuyết minh, câu hỏi tương tác và hướng dẫn xuất bài giảng chuẩn SCORM/HTML5.',
+          },
+          {
+            mod: 'SKILL 10',
+            title: 'Siêu SKILL Tạo hiệu ứng cho slide',
+            desc: 'Phân tích slide ảnh/PPTX, tách lớp Layer và tách chữ giữ nguyên phông chữ & bố cục, gắn hiệu ứng Animation và xuất file PowerPoint chỉnh sửa được.',
+          },
+          {
+            mod: 'SKILL 11',
+            title: 'Siêu SKILL Tạo mọi SKILL cho giáo viên',
+            desc: 'Tiếp nhận cấp học & môn dạy (Mầm non đến Đại học, Chủ nhiệm, Tổ chuyên môn), tự đề xuất 5–7 SKILL sát việc và viết câu lệnh hoàn chỉnh.',
+          },
+          {
+            mod: 'SKILL 12',
+            title: 'Siêu SKILL Tạo prompt trò chơi học tập',
+            desc: 'Tạo prompt game tương tác (trắc nghiệm, kéo thả, ghép đôi, vượt chướng ngại vật...) chạy trên Gemini Canvas, Google AI Studio và Canva AI.',
+          },
+          {
+            mod: 'SKILL 13',
+            title: 'Siêu SKILL Tạo prompt mô phỏng 3D / Thí nghiệm ảo',
+            desc: 'Chuyển nội dung & ảnh SGK các môn KHTN, Vật lí, Hóa học, Sinh học, Địa lí, Công nghệ thành siêu câu lệnh tạo Web App mô phỏng 3D an toàn.',
+          },
+          {
+            mod: 'SKILL 14',
+            title: 'Siêu SKILL Tạo prompt tạo App giáo dục',
+            desc: 'Không cần lập trình: mô tả nhu cầu bằng tiếng Việt để tạo App học tập, kiểm tra trắc nghiệm, quản lý lớp học và theo dõi kết quả.',
+          },
+          {
+            mod: 'SKILL 15',
+            title: 'Siêu SKILL Tạo prompt hình ảnh minh họa trên ChatGPT',
+            desc: 'Thiết kế ảnh minh họa bài học, sơ đồ, infographic, mô hình 3D cắt lớp giữ chữ tiếng Việt chuẩn với 48 phong cách mỹ thuật chuyên nghiệp.',
+          },
+          {
+            mod: 'SKILL 16',
+            title: 'Siêu SKILL Tạo prompt hình ảnh siêu đỉnh trên Gemini',
+            desc: 'Hỗ trợ Nano Banana 2 & Nano Banana Pro, tạo ảnh độ phân giải cao, đồng nhất nhân vật, giữ tiếng Việt sắc nét cho slide và học liệu.',
+          },
+          {
+            mod: 'SKILL 17',
+            title: 'Siêu SKILL Tạo prompt Film giáo dục',
+            desc: 'Xây dựng kịch bản & bộ prompt phim hoạt hình 3D, khoa học, lịch sử – văn hóa, kỹ năng sống đồng nhất nhân vật cho Veo 3.1 và Google Flow.',
+          },
+          {
+            mod: 'SKILL 18',
+            title: 'Siêu SKILL Tạo video vẽ tay giáo dục',
+            desc: 'Tạo kịch bản và prompt video Whiteboard Animation giải thích khái niệm, sơ đồ, truyện kể trực quan kèm lời thuyết minh tiếng Việt.',
+          },
+          {
+            mod: 'SKILL 19',
+            title: 'Siêu SKILL Tạo video đa phong cách',
+            desc: 'Linh hoạt nhiều thể loại (3D, vẽ tay, Cinematic, Anime, lịch sử, thực tế) với kỹ thuật khóa nhân vật, bối cảnh và giọng đọc đồng nhất.',
+          },
+          {
+            mod: 'SKILL 20',
+            title: 'Siêu SKILL Tạo video thuyết trình đỉnh cao',
+            desc: 'Tạo kịch bản video thuyết trình kết hợp sơ đồ tư duy động, biểu đồ và hình ảnh 3D phục vụ dạy học, báo cáo chuyên đề và dự thi.',
+          },
+          {
+            mod: 'SKILL 21',
+            title: 'Siêu SKILL Thiết kế Slide bám sát SGK',
+            desc: 'Phân tích trực tiếp ảnh trang SGK, lập outline theo đúng 4 hoạt động (Khởi động – Khám phá – Luyện tập – Vận dụng) và xuất bộ slide PNG/ZIP/PPTX.',
+          },
+          {
+            mod: 'SKILL 22',
+            title: 'Siêu SKILL Edit Video chuyên nghiệp',
+            desc: 'Hỗ trợ biên tập từ video thô: tự lọc ừ/ờ/nói vấp, rút khoảng lặng, xóa câu lặp, thêm motion graphics, phụ đề tiếng Việt và xuất MP4.',
+          },
+          {
+            mod: 'SKILL 23',
+            title: 'Siêu SKILL Video Mô Phỏng Gemini Canvas',
+            desc: 'Tạo câu lệnh chuyên sâu cho video mô phỏng 3D chuyển động có lời thoại tiếng Việt, hỗ trợ nạp MP3 từng cảnh, chọn phân cảnh và xuất video.',
+          },
+        ],
+        gifts: [
+          'Quà tặng số 01: Toàn bộ "Bộ Nhân Vật SGK Đi Đứng Nói Để Tạo Video AI" (Cánh Diều, 30 nhân vật Chân Trời Sáng Tạo, 6 nhân vật Kết Nối Tri Thức, 25 nghề nghiệp, bộ gia đình)',
+          'Quà tặng số 02: Kho "1200 Trò Chơi Học Tập Tương Tác Các Cấp bằng AI và PowerPoint" (Mầm non, Tiểu học, THCS, THPT)',
+          'Quà tặng số 03: Trọn bộ 02 Khóa học Video Online — "Tạo Trợ Lý AI Cho Giáo Viên" và "Quy Trình Tạo Trò Chơi Học Tập Tương Tác Từ A Đến Z (4 dạng trò chơi)"',
+        ],
+        paymentInfo:
+          'Ngân Hàng Quân Đội: MB Bank - STK: 5358.6666.8888 - Chủ TK: CTY TNHH MTV GD EDUNEXA - Nội dung: HỌ TÊN + SĐT + HL10',
       },
       {
         id: 'bo-tai-lieu-quan-trong',
@@ -553,12 +726,22 @@ export function buildDefaultCmsSnapshot(): CmsSnapshot {
         courseId: '03-cuon-cam-nang-toan-dien',
         courseLabel: '03 Cuốn Cẩm Nang Toàn Diện',
       },
+      {
+        id: 'artifact-hl10-23-skill',
+        category: 'Bộ 23 Siêu SKILL · HL10',
+        title: 'Hệ sinh thái 23 Siêu SKILL AI Toàn Diện cho giáo viên',
+        description:
+          'Trọn bộ 23 File SKILL cài thẳng trên ChatGPT & Gemini: soạn giáo án, tích hợp Năng lực số, SKKN, ma trận đề, slide SGK, trò chơi, mô phỏng 3D, App và video.',
+        image: IMG_HL10_OVERVIEW,
+        courseId: 'hoc-lieu-so-10-bo-23-sieu-skill',
+        courseLabel: 'Học Liệu Số 10: Bộ 23 Siêu SKILL AI Toàn Diện Cho Giáo Viên',
+      },
     ],
     // Không tự tạo phản hồi giả — Quản trị viên thêm phản hồi thực tế có nguồn xác thực trong /quan-tri
     testimonials: [],
     instructor: {
-      kicker: '07 · Giảng viên & Học viện EDUNEXA',
-      heading: 'Đồng hành cùng giáo viên Việt Nam chuyển đổi số thực chất',
+      kicker: '02 · Người đồng hành cùng Thầy Cô',
+      heading: 'Từ thực tiễn lớp học Việt Nam đến lộ trình AI dễ học, dễ làm',
       name: 'Thầy Trần Đông (Trần Văn Đông)',
       roleLine: 'Nhà sáng lập EDUNEXA · Đào tạo ứng dụng AI trong giáo dục',
       bioParagraph1:
@@ -607,11 +790,11 @@ export function buildDefaultCmsSnapshot(): CmsSnapshot {
       },
     ],
     sectionVisibility: {
-      'gia-tri': true,
+      'gia-tri': false,
       'khoa-hoc': true,
-      'san-pham': true,
-      'lo-trinh': true,
-      'quy-trinh': true,
+      'san-pham': false,
+      'lo-trinh': false,
+      'quy-trinh': false,
       'giang-vien': true,
       'phan-hoi': true,
       'hoi-dap': true,
@@ -623,9 +806,9 @@ export function buildDefaultCmsSnapshot(): CmsSnapshot {
       founderPortrait: IMG_FOUNDER_PORTRAIT,
     },
     settings: {
-      siteName: 'EDUNEXA AI — Đào Tạo Ứng Dụng AI Thực Chiến Cho Giáo Viên',
+      siteName: 'EDUNEXA AI — Làm Chủ AI Trong Dạy Học, Soạn Giảng Nhanh & Sáng Tạo Vượt Trội',
       siteDescription:
-        'Học AI thực chiến dành cho giáo viên Việt Nam. Tạo giáo án chuẩn 5512, slide bài giảng, trò chơi tương tác, mô phỏng 3D, Web App và video AI giáo dục.',
+        'Học AI thực chiến dành riêng cho giáo viên Việt Nam tại EDUNEXA: soạn giáo án chuẩn 5512, thiết kế slide, trò chơi mô phỏng 3D, video AI và bộ 23 Siêu SKILL dùng ngay trên lớp.',
       footerDescription:
         'Hệ thống đào tạo ứng dụng AI thực hành dành cho giáo viên và đơn vị giáo dục Việt Nam, hướng tới tạo ra học liệu số thực tế áp dụng ngay trong giảng dạy.',
       copyrightText: '© 2026 CONG TY TNHH MTV GIAO DUC EDUNEXA. Bảo lưu mọi quyền.',

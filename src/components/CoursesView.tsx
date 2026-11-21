@@ -49,13 +49,13 @@ export function CoursesView({ courses, settings, navigateTo }: CoursesViewProps)
 
         <div className="max-w-2xl mb-10">
           <p className="text-xs font-semibold text-[#0D9488] tracking-wide mb-2">
-            Danh mục đào tạo · EDUNEXA
+            Khóa học & Học liệu thực chiến · EDUNEXA AI
           </p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#081426] leading-tight mb-3">
-            Các khóa học AI dành cho giáo viên
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#081426] leading-tight mb-3 text-balance">
+            Làm chủ AI sư phạm — Nhẹ gánh soạn bài, nâng tầm tiết dạy
           </h1>
           <p className="text-base text-slate-600 leading-relaxed">
-            Lọc theo nhóm kỹ năng thực hành: soạn giáo án, thiết kế slide, trò chơi & mô phỏng, video AI, ứng dụng & trợ lý AI.
+            Lọc nhanh theo đúng nhu cầu giảng dạy của Thầy Cô: soạn giáo án, thiết kế slide, trò chơi & mô phỏng 3D, video AI hay trọn bộ 23 Siêu SKILL.
           </p>
         </div>
 

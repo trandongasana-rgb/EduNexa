@@ -29,15 +29,11 @@ const STANDARD_SECTIONS: Array<{
   label: string;
   desc: string;
 }> = [
-  { key: 'gia-tri', index: '02', label: 'Giá trị mà giáo viên nhận được', desc: '4 giá trị cốt lõi & ảnh giáo viên thực hành' },
-  { key: 'khoa-hoc', index: '03', label: 'Các nhóm khóa học AI', desc: 'Bộ lọc nhóm khóa học và lưới thẻ khóa học' },
-  { key: 'san-pham', index: '04', label: 'Sản phẩm học viên thực hành', desc: 'Các đầu ra học liệu thực tế giáo viên tạo được' },
-  { key: 'lo-trinh', index: '05', label: 'Lộ trình học từng bước (10 chuyên đề)', desc: '3 giai đoạn chuyển đổi từ cơ bản tới nâng cao' },
-  { key: 'quy-trinh', index: '06', label: 'Quy trình học và hỗ trợ', desc: '4 bước đồng hành cùng EDUNEXA' },
-  { key: 'giang-vien', index: '07', label: 'Giới thiệu giảng viên và EDUNEXA', desc: 'Hồ sơ Thầy Trần Đông & kênh chính thức' },
-  { key: 'phan-hoi', index: '08', label: 'Phản hồi học viên & Thư viện ảnh', desc: 'Chia sẻ học viên có nguồn thực tế và ảnh Drive' },
-  { key: 'hoi-dap', index: '09', label: 'Câu hỏi thường gặp (FAQ)', desc: 'Danh sách giải đáp thắc mắc trước khi đăng ký' },
-  { key: 'dang-ky', index: '10', label: 'Khu vực đăng ký cuối trang', desc: 'Biểu mẫu đăng ký trực tiếp, link form và VietQR' },
+  { key: 'khoa-hoc', index: '01', label: 'Khóa học & Học liệu AI', desc: 'Bộ lọc nhóm kỹ năng và lưới thẻ khóa học / học liệu' },
+  { key: 'giang-vien', index: '02', label: 'Giới thiệu giảng viên và EDUNEXA', desc: 'Hồ sơ Thầy Trần Đông & các kênh chính thức' },
+  { key: 'phan-hoi', index: '03', label: 'Cộng đồng & Phản hồi xác thực', desc: 'Chia sẻ học viên có nguồn thực tế và ảnh Drive' },
+  { key: 'hoi-dap', index: '04', label: 'Câu hỏi thường gặp (FAQ)', desc: 'Danh sách giải đáp thắc mắc trước khi đăng ký' },
+  { key: 'dang-ky', index: '05', label: 'Khu vực đăng ký cuối trang', desc: 'Biểu mẫu đăng ký trực tiếp, học phí và mã VietQR' },
 ];
 
 type SubTab = 'hero' | 'sections' | 'instructor' | 'faqs' | 'proof';
@@ -149,9 +145,9 @@ export function LandingContentSection({
         {[
           { id: 'hero' as const, label: 'Hero & Nút CTA' },
           { id: 'sections' as const, label: 'Thêm / Ẩn Section' },
-          { id: 'instructor' as const, label: 'Giảng viên & Ảnh mục 02' },
+          { id: 'instructor' as const, label: 'Giới thiệu giảng viên' },
           { id: 'faqs' as const, label: `Câu hỏi thường gặp (${draft.faqs.length})` },
-          { id: 'proof' as const, label: `Sản phẩm & Phản hồi (${draft.testimonials.length})` },
+          { id: 'proof' as const, label: `Học liệu khóa học & Phản hồi (${draft.testimonials.length})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -269,7 +265,7 @@ export function LandingContentSection({
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nhãn CTA phụ (cuộn tới Sản phẩm thực tế)
+                  Nhãn CTA phụ (cuộn tới Đăng ký & Tư vấn)
                 </label>
                 <input
                   type="text"
@@ -317,7 +313,7 @@ export function LandingContentSection({
                 Bật / Ẩn từng Section trên Landing Page
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Kiểm soát hiển thị các phần nội dung từ 02 đến 10 trên trang chủ công khai.
+                Kiểm soát hiển thị các phần nội dung từ 01 đến 05 trên trang chủ công khai.
               </p>
             </div>
 
@@ -544,7 +540,7 @@ export function LandingContentSection({
           <section className="bg-white p-6 rounded-2xl border border-slate-200 space-y-5">
             <div className="pb-3 border-b border-slate-100">
               <h2 className="text-lg font-extrabold text-[#081426]">
-                Nội dung giới thiệu giảng viên & EDUNEXA (Mục 07)
+                Nội dung giới thiệu giảng viên & EDUNEXA (Mục 02)
               </h2>
             </div>
 
@@ -669,30 +665,6 @@ export function LandingContentSection({
                   />
                 </div>
               </div>
-            </div>
-          </section>
-
-          <section className="bg-white p-6 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <MediaFrame
-              src={draft.siteMedia.valueSectionImage}
-              alt="Ảnh mục 02 Giá trị cốt lõi"
-              className="w-full sm:w-56 aspect-[16/10] rounded-xl border border-slate-200 shrink-0"
-            />
-            <div className="space-y-2.5 flex-1">
-              <h3 className="text-base font-bold text-[#081426]">
-                Ảnh minh họa mục 02 — Giá trị cho giáo viên
-              </h3>
-              <p className="text-xs text-slate-500">
-                Chọn ảnh thực hành tập huấn giáo viên từ Thư viện Drive hoặc tải ảnh mới lên máy chủ.
-              </p>
-              <button
-                type="button"
-                onClick={() => setPickerTarget({ kind: 'valueImage' })}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#081426] text-white text-xs font-bold cursor-pointer"
-              >
-                <HardDrive className="w-3.5 h-3.5 text-[#F5BF35]" />
-                <span>Chọn ảnh từ Thư viện Drive</span>
-              </button>
             </div>
           </section>
         </div>

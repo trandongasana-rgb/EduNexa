@@ -13,10 +13,9 @@ interface HeaderProps {
 }
 
 const NAV_ITEMS = [
-  { label: 'Giá trị', sectionId: 'gia-tri' },
   { label: 'Khóa học', sectionId: 'khoa-hoc' },
-  { label: 'Sản phẩm', sectionId: 'san-pham' },
-  { label: 'Lộ trình', sectionId: 'lo-trinh' },
+  { label: 'Giảng viên', sectionId: 'giang-vien' },
+  { label: 'Cộng đồng', sectionId: 'phan-hoi' },
   { label: 'Hỏi đáp', sectionId: 'hoi-dap' },
 ];
 

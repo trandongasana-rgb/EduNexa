@@ -327,6 +327,120 @@ if (!existingPublishedCms || !existingDraftCms) {
   }
 }
 
+// One-time additive data migration: ensure Học Liệu Số 10: Bộ 23 Siêu SKILL is added to existing databases
+db.exec(`
+  CREATE TABLE IF NOT EXISTS app_migrations (
+    id TEXT PRIMARY KEY,
+    appliedAt TEXT NOT NULL
+  );
+`);
+
+const hl10MigrationId = 'seed_hl10_bo_23_sieu_skill_v1';
+const hl10Applied = db
+  .prepare('SELECT id FROM app_migrations WHERE id = ?')
+  .get(hl10MigrationId);
+if (!hl10Applied) {
+  const defaults = buildDefaultCmsSnapshot();
+  const hl10Course = defaults.courses.find((c) => c.id === 'hoc-lieu-so-10-bo-23-sieu-skill');
+  const hl10Artifact = defaults.artifacts.find((a) => a.id === 'artifact-hl10-23-skill');
+  const now = new Date().toISOString();
+
+  for (const docId of ['published', 'draft'] as const) {
+    const row = db
+      .prepare('SELECT payloadJson FROM cms_documents WHERE id = ?')
+      .get(docId) as { payloadJson: string } | undefined;
+    if (!row) continue;
+    try {
+      const parsed = JSON.parse(row.payloadJson) as Partial<CmsSnapshot>;
+      let changed = false;
+      if (hl10Course && Array.isArray(parsed.courses)) {
+        if (!parsed.courses.some((c) => c.id === hl10Course.id)) {
+          parsed.courses = [
+            parsed.courses[0],
+            hl10Course,
+            ...parsed.courses.slice(1),
+          ].filter(Boolean) as CmsSnapshot['courses'];
+          changed = true;
+        }
+      }
+      if (hl10Artifact && Array.isArray(parsed.artifacts)) {
+        if (!parsed.artifacts.some((a) => a.id === hl10Artifact.id)) {
+          parsed.artifacts = [...parsed.artifacts, hl10Artifact];
+          changed = true;
+        }
+      }
+      if (changed) {
+        db.prepare(
+          'UPDATE cms_documents SET payloadJson = ?, updatedAt = ?, updatedBy = ? WHERE id = ?'
+        ).run(JSON.stringify(parsed), now, 'Hệ thống', docId);
+      }
+    } catch {
+      // ignore malformed snapshot
+    }
+  }
+
+  db.prepare('INSERT INTO app_migrations (id, appliedAt) VALUES (?, ?)').run(hl10MigrationId, now);
+}
+
+const landingCopyMigrationId = 'update_landing_copy_and_sections_v2';
+const landingCopyApplied = db
+  .prepare('SELECT id FROM app_migrations WHERE id = ?')
+  .get(landingCopyMigrationId);
+if (!landingCopyApplied) {
+  const defaults = buildDefaultCmsSnapshot();
+  const now = new Date().toISOString();
+
+  for (const docId of ['published', 'draft'] as const) {
+    const row = db
+      .prepare('SELECT payloadJson FROM cms_documents WHERE id = ?')
+      .get(docId) as { payloadJson: string } | undefined;
+    if (!row) continue;
+    try {
+      const parsed = JSON.parse(row.payloadJson) as Partial<CmsSnapshot>;
+      parsed.heroContent = {
+        ...defaults.heroContent,
+        ...(parsed.heroContent || {}),
+        kicker: defaults.heroContent.kicker,
+        headlineLine1: defaults.heroContent.headlineLine1,
+        headlineLine2: defaults.heroContent.headlineLine2,
+        description: defaults.heroContent.description,
+        primaryCtaLabel: defaults.heroContent.primaryCtaLabel,
+        secondaryCtaLabel: defaults.heroContent.secondaryCtaLabel,
+      };
+      parsed.instructor = {
+        ...defaults.instructor,
+        ...(parsed.instructor || {}),
+        kicker: defaults.instructor.kicker,
+        heading: defaults.instructor.heading,
+      };
+      parsed.sectionVisibility = {
+        ...defaults.sectionVisibility,
+        ...(parsed.sectionVisibility || {}),
+        'gia-tri': false,
+        'san-pham': false,
+        'lo-trinh': false,
+        'quy-trinh': false,
+      };
+      parsed.settings = {
+        ...defaults.settings,
+        ...(parsed.settings || {}),
+        siteName: defaults.settings.siteName,
+        siteDescription: defaults.settings.siteDescription,
+      };
+      db.prepare(
+        'UPDATE cms_documents SET payloadJson = ?, updatedAt = ?, updatedBy = ? WHERE id = ?'
+      ).run(JSON.stringify(parsed), now, 'Hệ thống', docId);
+    } catch {
+      // ignore malformed snapshot
+    }
+  }
+
+  db.prepare('INSERT INTO app_migrations (id, appliedAt) VALUES (?, ?)').run(
+    landingCopyMigrationId,
+    now
+  );
+}
+
 export function verifyAdminPassword(candidate: string): boolean {
   const row = db
     .prepare('SELECT passwordHash, salt FROM admin_auth WHERE id = 1')

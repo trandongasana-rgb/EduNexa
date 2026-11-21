@@ -38,6 +38,17 @@ export const COURSE_MATCH_CATALOG: Array<{ courseId: string; tokens: string[] }>
     tokens: ['ai-toan-dien-cho-giao-vien', 'ai-toan-dien', 'ai_toan_dien', 'toan-dien', '10-chuyen-de'],
   },
   {
+    courseId: 'hoc-lieu-so-10-bo-23-sieu-skill',
+    tokens: [
+      'hoc-lieu-so-10-bo-23-sieu-skill',
+      'hoc-lieu-so-10',
+      'hl10',
+      '23-sieu-skill',
+      'bo-23-sieu-skill',
+      'sieu-skill',
+    ],
+  },
+  {
     courseId: 'bo-tai-lieu-quan-trong',
     tokens: ['bo-tai-lieu-quan-trong', 'bo-tai-lieu', 'tai-lieu-3-ngay', '03-ngay', '3-ngay'],
   },
